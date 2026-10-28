@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Medidor } from './componentes/Medidor';
 import { Regua } from './componentes/Regua';
 import { Ajustes } from './componentes/Ajustes';
@@ -16,13 +16,13 @@ import {
   paceNaUnidade,
   PROVAS,
   tempoDaProva,
-  tomDaVelocidade,
   velocidadeEmKmh,
   velocidadeNaUnidade,
   type Modo,
   type UnidadeEsteira,
   type UnidadePace,
 } from './lib/pace';
+import { aplicarPaleta, paleta } from './lib/paletas';
 import { lerPreferencias, salvarPreferencias, type Preferencias } from './lib/preferencias';
 import { definirVibracao, vibrar } from './lib/vibrar';
 
@@ -38,9 +38,7 @@ export function App() {
 
   useEffect(() => salvarPreferencias(p), [p]);
   useEffect(() => definirVibracao(p.vibracao), [p.vibracao]);
-  useEffect(() => {
-    document.documentElement.style.setProperty('--h', String(Math.round(tomDaVelocidade(r.kmh))));
-  }, [r.kmh]);
+  useLayoutEffect(() => aplicarPaleta(paleta(p.paleta), r.kmh), [p.paleta, r.kmh]);
 
   const mudarValor = (v: number) => {
     const n = limitar(v, faixa.min, faixa.max);
@@ -196,6 +194,7 @@ export function App() {
           onUnidadePace={mudarUnidadePace}
           onUnidadeEsteira={mudarUnidadeEsteira}
           onVibracao={(v) => setP((a) => ({ ...a, vibracao: v }))}
+          onPaleta={(id) => setP((a) => ({ ...a, paleta: id }))}
         />
       )}
     </div>

@@ -1,3 +1,4 @@
+import { PALETAS } from './paletas';
 import { FAIXA_ESTEIRA, FAIXA_PACE, limitar, type Modo, type UnidadeEsteira, type UnidadePace } from './pace';
 
 // Tudo fica só no celular (localStorage). Sem login e sem internet.
@@ -9,6 +10,7 @@ export interface Preferencias {
   unidadePace: UnidadePace;
   unidadeEsteira: UnidadeEsteira;
   vibracao: boolean;
+  paleta: string;
   favoritosPace: number[];
   favoritosEsteira: number[];
   dicaVista: boolean;
@@ -23,6 +25,7 @@ export const PADRAO: Preferencias = {
   unidadePace: 'km',
   unidadeEsteira: 'kmh',
   vibracao: true,
+  paleta: 'neon',
   favoritosPace: [],
   favoritosEsteira: [],
   dicaVista: false,
@@ -50,6 +53,7 @@ export function lerPreferencias(): Preferencias {
     unidadePace,
     unidadeEsteira,
     vibracao: p.vibracao !== false,
+    paleta: PALETAS.some((x) => x.id === p.paleta) ? (p.paleta as string) : PADRAO.paleta,
     favoritosPace: numeros(p.favoritosPace),
     favoritosEsteira: numeros(p.favoritosEsteira),
     dicaVista: p.dicaVista === true,

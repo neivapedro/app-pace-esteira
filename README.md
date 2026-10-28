@@ -12,7 +12,7 @@ Mesma base dos outros apps (React + Vite, GitHub Pages). Não tem login nem banc
 | **Esteira → Pace** | O contrário: escolha a velocidade da esteira e veja o pace. |
 | **Tempos de prova** | 5 km, 10 km, 21 km e 42 km no ritmo escolhido. |
 | **Salvos** | A estrela guarda os ritmos que você usa (aquecimento, ritmo de prova, tiro) para voltar a eles com um toque. |
-| **Cor** | O app muda de cor com a velocidade: ciano devagar, roxo no meio, vermelho nos tiros. |
+| **Cores** | 8 paletas em Ajustes: Neon, Grafite, Café, Verde, Laranja, Oceano, Rosa e Vermelho (`src/lib/paletas.ts`). Em cada uma, o tom ainda muda com a velocidade dentro da mesma família de cor. |
 | **Ajustes** | Pace em min/km ou min/milha; esteira em km/h ou mph (esteiras de hotel nos EUA); vibração ao ajustar (iPhone com iOS 18 ou mais novo). |
 
 As contas estão em `src/lib/pace.ts`, com testes em `src/lib/pace.test.ts`.

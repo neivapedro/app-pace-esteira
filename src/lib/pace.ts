@@ -88,15 +88,6 @@ export function tempoDaProva(segPorKm: number, km: number): number {
   return segPorKm * km;
 }
 
-/**
- * Tom da cor do app (0-360) pela velocidade: ciano devagar, roxo no meio,
- * vermelho-alaranjado nos tiros.
- */
-export function tomDaVelocidade(kmh: number): number {
-  const t = limitar((kmh - 5) / 15, 0, 1);
-  return (175 + t * 195) % 360;
-}
-
 export interface Resultado {
   /** Valor escolhido na régua, já formatado. */
   entrada: string;
