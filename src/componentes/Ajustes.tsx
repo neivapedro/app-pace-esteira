@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { amostra, PALETAS } from '../lib/paletas';
 import type { UnidadeEsteira, UnidadePace } from '../lib/pace';
 import type { Preferencias } from '../lib/preferencias';
 import { vibrar } from '../lib/vibrar';
@@ -9,9 +10,10 @@ interface Props {
   onUnidadePace: (u: UnidadePace) => void;
   onUnidadeEsteira: (u: UnidadeEsteira) => void;
   onVibracao: (v: boolean) => void;
+  onPaleta: (id: string) => void;
 }
 
-export function Ajustes({ p, onFechar, onUnidadePace, onUnidadeEsteira, onVibracao }: Props) {
+export function Ajustes({ p, onFechar, onUnidadePace, onUnidadeEsteira, onVibracao, onPaleta }: Props) {
   const [saindo, setSaindo] = useState(false);
   const fechar = () => {
     setSaindo(true);
@@ -29,6 +31,26 @@ export function Ajustes({ p, onFechar, onUnidadePace, onUnidadeEsteira, onVibrac
       <div className="folha" role="dialog" aria-label="Ajustes" onClick={(e) => e.stopPropagation()}>
         <span className="folha-alca" />
         <h2>Ajustes</h2>
+
+        <div className="cores">
+          <span>Cores</span>
+          <div className="paletas">
+            {PALETAS.map((x) => (
+              <button
+                key={x.id}
+                className={`paleta ${x.id === p.paleta ? 'ativo' : ''}`}
+                aria-pressed={x.id === p.paleta}
+                onClick={() => {
+                  vibrar();
+                  onPaleta(x.id);
+                }}
+              >
+                <i style={{ background: amostra(x) }} />
+                {x.nome}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <div className="linha">
           <span>Pace em</span>

@@ -8,7 +8,6 @@ import {
   formatarVelocidade,
   paceDaVelocidade,
   tempoDaProva,
-  tomDaVelocidade,
   velocidadeDoPace,
 } from './pace';
 
@@ -91,10 +90,4 @@ describe('tela', () => {
     // Fora da faixa: fica no limite
     expect(converterValor('esteira', 30, 'km', 'kmh')).toBe(1200);
   });
-});
-
-it('cor vai de ciano (devagar) a vermelho (rápido)', () => {
-  expect(tomDaVelocidade(4)).toBe(175);
-  expect(tomDaVelocidade(20)).toBe(10);
-  expect(tomDaVelocidade(30)).toBe(10);
 });
