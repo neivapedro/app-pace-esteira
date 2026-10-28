@@ -8,6 +8,7 @@ import {
   formatarVelocidade,
   paceDaVelocidade,
   tempoDaProva,
+  esteiraParaPace,
   velocidadeDoPace,
 } from './pace';
 
@@ -89,5 +90,37 @@ describe('tela', () => {
     expect(converterValor('esteira', 120, 'km', 'kmh')).toBe(300);
     // Fora da faixa: fica no limite
     expect(converterValor('esteira', 30, 'km', 'kmh')).toBe(1200);
+  });
+});
+
+describe('inclinação e calibração', () => {
+  it('com inclinação, a esteira fica mais devagar para o mesmo esforço', () => {
+    // 5:00/km = 12 km/h no plano; com 2% (fator 1,09): 11,0 km/h
+    const r = calcular('pace', 300, 'km', 'kmh', { inclinacao: 2, fator: 1 });
+    expect(r.saida).toBe('11,0');
+    expect(r.detalhe).toBe('Com 2% de inclinação · ritmo real 5:27/km');
+    expect(r.kmh).toBeCloseTo(12);
+  });
+
+  it('modo esteira mostra o esforço no plano', () => {
+    const r = calcular('esteira', 100, 'km', 'kmh', { inclinacao: 3, fator: 1 });
+    expect(r.saida).toBe('6:00');
+    // 10 km/h com 3% (fator 1,135) = 11,35 km/h de esforço = 5:17/km
+    expect(r.detalhe).toBe('Com 3% de inclinação · esforço de 5:17/km no plano');
+  });
+
+  it('calibração: esteira que mostra a mais pede velocidade maior', () => {
+    // O relógio mede 9,6 km quando a esteira mostra 10: fator 0,96. 12 km/h reais = 12,5 na esteira
+    const r = calcular('pace', 300, 'km', 'kmh', { inclinacao: 0, fator: 0.96 });
+    expect(r.saida).toBe('12,5');
+    expect(r.detalhe.endsWith('· calibrada')).toBe(true);
+    expect(esteiraParaPace(300, 'kmh', { inclinacao: 0, fator: 0.96 })).toBe(12.5);
+  });
+
+  it('troca de modo mantém a velocidade da esteira com ajustes', () => {
+    const o = { inclinacao: 2, fator: 1 };
+    const d = converterValor('pace', 300, 'km', 'kmh', o);
+    expect(d).toBe(110);
+    expect(converterValor('esteira', d, 'km', 'kmh', o)).toBe(300);
   });
 });

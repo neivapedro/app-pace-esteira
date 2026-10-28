@@ -6,16 +6,22 @@ Mesma base dos outros apps (React + Vite, GitHub Pages). Não tem login nem banc
 
 ## O que o app faz
 
-| Parte | Conteúdo |
-|---|---|
-| **Pace → Esteira** | Deslize a régua (ou segure − / +) para escolher o pace; o velocímetro mostra a velocidade já arredondada como a esteira aceita (0,1 em 0,1). Quando o arredondamento muda o pace, avisa (ex.: 9:00/km → 6,7 km/h → "o pace fica 8:57/km"); senão mostra o valor exato. |
-| **Esteira → Pace** | O contrário: escolha a velocidade da esteira e veja o pace. |
-| **Tempos de prova** | 5 km, 10 km, 21 km e 42 km no ritmo escolhido. |
-| **Salvos** | A estrela guarda os ritmos que você usa (aquecimento, ritmo de prova, tiro) para voltar a eles com um toque. |
-| **Cores** | 8 paletas em Ajustes: Neon, Grafite, Café, Verde, Laranja, Oceano, Rosa e Vermelho (`src/lib/paletas.ts`). Em cada uma, o tom ainda muda com a velocidade dentro da mesma família de cor. |
-| **Ajustes** | Pace em min/km ou min/milha; esteira em km/h ou mph (esteiras de hotel nos EUA); vibração ao ajustar (iPhone com iOS 18 ou mais novo). |
+Três abas numa barra flutuante de vidro (visual do iOS 26):
 
-As contas estão em `src/lib/pace.ts`, com testes em `src/lib/pace.test.ts`.
+| Aba | Conteúdo |
+|---|---|
+| **Ritmo** | Deslize a régua, segure − / + ou **gire o velocímetro com o dedo** para escolher o pace; a velocidade da esteira aparece na hora, já arredondada de 0,1 em 0,1. Os números **rolam como um odômetro** e ficam **mais grossos e brilhantes** quanto mais rápido. Também tem o modo inverso (Esteira → Pace), os tempos de 5, 10, 21 e 42 km, os ritmos salvos na estrela e, tracejados, os **mais usados** (aparecem sozinhos). O botão de **inclinação** ajusta a velocidade para manter o esforço do pace escolhido. Com zonas definidas, elas aparecem como **faixas coloridas na régua** e o nome da zona aparece embaixo do velocímetro. |
+| **Treino** | Modelos prontos (rodagem, tiros de 1 min, tiros de 400 m, intervalado, limiar, progressivo) com os ritmos das suas zonas, e editor sem digitar: blocos e séries de tiros por tempo ou distância. No **treino em andamento**: velocidade de cada etapa em destaque, contagem regressiva, a próxima etapa, **avisos falados** ("Tiro 2 de 8. Coloque 13,3"), bipes de 3-2-1 e tela sempre acesa. Dá para compartilhar o treino como texto (WhatsApp etc.). |
+| **Metas** | **Pace da meta** (distância + tempo nas rodas, sem digitar). **Seu nível**: com uma prova recente, calcula o índice de forma (VDOT de Jack Daniels), os tempos previstos e as **zonas de treino** (leve, maratona, limiar, intervalado, tiro curto). Toque numa zona para levá-la à aba Ritmo. |
+| **Ajustes** | 8 paletas de cores, pace em min/km ou min/milha, esteira em km/h ou mph, vibração, tela sempre acesa, voz e **calibração da esteira** (quanto o relógio marca quando a esteira mostra 10 km). |
+
+Contas em `src/lib/` com testes ao lado:
+- `pace.ts`: conversões, inclinação (equação de corrida do ACSM: cada 1% ≈ 4,5% a mais de velocidade no plano) e calibração;
+- `zonas.ts`: índice de forma, previsões e zonas (método VDOT, conferido com a tabela de Daniels);
+- `treino.ts`: treinos, modelos e a sequência de etapas;
+- `usos.ts`: ritmos mais usados.
+
+Recursos do iPhone usados: tela acesa (Screen Wake Lock), voz do sistema, vibração ao ajustar (iOS 18+), funciona sem internet. Não dá para usar Dynamic Island, widgets, tela bloqueada nem Apple Watch: isso exigiria um app nativo da App Store.
 
 ## Rodar localmente
 

@@ -1,0 +1,228 @@
+/* ---------- Treino em andamento ---------- */
+
+.executar {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.executar-topo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.executar-nome {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.executar-nome b {
+  font-size: 17px;
+  font-weight: 750;
+}
+
+.executar-nome small {
+  font-size: 13px;
+  color: var(--texto-2);
+}
+
+.icone-botao.mudo {
+  color: var(--texto-3);
+}
+
+/* Faixa com todas as etapas (tiros mais claros) */
+.faixa-treino {
+  display: flex;
+  gap: 3px;
+  height: 8px;
+}
+
+.faixa-treino i {
+  min-width: 3px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.faixa-treino .seg-forte {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.faixa-treino .seg-ritmo {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.faixa-treino .feito {
+  background: var(--cor);
+  opacity: 0.5;
+}
+
+.faixa-treino .atual {
+  background: var(--cor);
+  box-shadow: 0 0 10px var(--cor);
+}
+
+.executar-palco {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 12px;
+  container-type: size;
+}
+
+.anel {
+  --tam: min(86vw, calc(100cqh - 240px), 380px);
+  position: relative;
+  width: var(--tam);
+  aspect-ratio: 1;
+  flex: none;
+}
+
+.anel svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  overflow: visible;
+}
+
+.anel-fundo {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 5;
+}
+
+.anel-cor {
+  fill: none;
+  stroke: var(--cor);
+  stroke-width: 5;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.25s linear;
+  filter: drop-shadow(0 0 6px var(--cor));
+}
+
+.anel-miolo {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.anel-miolo small {
+  font-size: 13px;
+  color: var(--texto-2);
+}
+
+.restante {
+  margin-top: 4px;
+  font-size: calc(var(--tam) * 0.11);
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.restante.pisca {
+  color: var(--cor);
+  animation: piscar 0.5s ease-in-out infinite;
+}
+
+.proxima {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px;
+  border-radius: 24px;
+}
+
+.proxima b {
+  font-size: 17px;
+}
+
+.proxima .num {
+  color: var(--texto-2);
+  font-weight: 650;
+}
+
+.controles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 8px 22px;
+  border-radius: 999px;
+}
+
+.controles button {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--texto);
+  transition: transform 0.3s cubic-bezier(0.3, 1.5, 0.5, 1), opacity 0.2s;
+}
+
+.controles button:active {
+  transform: scale(0.88);
+}
+
+.controles button:disabled {
+  opacity: 0.3;
+}
+
+.controles .principal {
+  width: 74px;
+  height: 74px;
+  background: linear-gradient(135deg, var(--cor), var(--cor-2));
+  color: var(--tinta);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.45),
+    0 10px 30px -8px var(--cor);
+}
+
+.executar-fim {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.executar-fim h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 850;
+}
+
+.executar-fim p {
+  margin: 0 0 16px;
+  font-size: 17px;
+  color: var(--texto-2);
+}
+
+.executar-fim .folha-ok {
+  max-width: 280px;
+}
+
+.trofeu {
+  font-size: 72px;
+  animation: pulo 0.6s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
