@@ -102,18 +102,74 @@ export interface Resultado {
   kmh: number;
 }
 
+/**
+ * Ajustes de esteira:
+ * - inclinacao (%): pela equação de corrida do ACSM, cada 1% de subida custa como
+ *   4,5% a mais de velocidade no plano;
+ * - fator: velocidade real ÷ velocidade mostrada pela esteira (calibração; 1 = esteira certa).
+ */
+export interface Opcoes {
+  inclinacao: number;
+  fator: number;
+}
+
+export const SEM_AJUSTE: Opcoes = { inclinacao: 0, fator: 1 };
+
+/** Quanto a inclinação "vale" em velocidade no plano. */
+export function fatorInclinacao(inclinacao: number): number {
+  return 1 + 0.045 * inclinacao;
+}
+
+export function formatarInclinacao(g: number): string {
+  return `${formatarVelocidade(g, g % 1 === 0 ? 0 : 1)}%`;
+}
+
+export interface Resultado {
+  /** Valor escolhido na régua, já formatado. */
+  entrada: string;
+  unidadeEntrada: string;
+  /** O que a pessoa precisa saber. */
+  saida: string;
+  unidadeSaida: string;
+  /** Linha de detalhe (pode ficar vazia). */
+  detalhe: string;
+  /** Segundos por km do esforço (para os tempos de prova). */
+  segPorKm: number;
+  /** Velocidade do esforço em km/h (cor e velocímetro). */
+  kmh: number;
+  /** O que fica no visor da esteira, em décimos (109 = 10,9). */
+  esteiraDecimos: number;
+  /** Pace do esforço, em segundos por unidade de pace. */
+  paceEsforco: number;
+}
+
 /** Monta o que a tela mostra. `valor`: segundos (modo pace) ou décimos (modo esteira). */
-export function calcular(modo: Modo, valor: number, up: UnidadePace, ue: UnidadeEsteira): Resultado {
+export function calcular(modo: Modo, valor: number, up: UnidadePace, ue: UnidadeEsteira, o: Opcoes = SEM_AJUSTE): Resultado {
   const rotuloPace = up === 'km' ? '/km' : '/mi';
   const rotuloEsteira = ue === 'kmh' ? 'km/h' : 'mph';
+  const fi = fatorInclinacao(o.inclinacao);
+  const calibrada = Math.abs(o.fator - 1) > 1e-9;
+  const comInclinacao = o.inclinacao > 0;
+  const paceUnid = (kmh: number) => paceNaUnidade(3600 / kmh, up);
+
   if (modo === 'pace') {
-    const exata = velocidadeDoPace(valor, up, ue);
+    // Esforço escolhido -> velocidade real (menor se tiver subida) -> o que a esteira mostra
+    const kmhEsforco = 3600 / paceEmSegPorKm(valor, up);
+    const kmhReal = kmhEsforco / fi;
+    const exata = velocidadeNaUnidade(kmhReal / o.fator, ue);
     const naEsteira = arredondarEsteira(exata);
-    const paceReal = paceDaVelocidade(naEsteira, ue, up);
-    const detalhe =
-      formatarPace(paceReal) !== formatarPace(valor)
-        ? `Em ${formatarVelocidade(naEsteira)} ${rotuloEsteira} o pace fica ${formatarPace(paceReal)}${rotuloPace}`
-        : `Exato: ${formatarVelocidade(exata, 2)} ${rotuloEsteira}`;
+    const realArred = velocidadeEmKmh(naEsteira, ue) * o.fator;
+    let detalhe: string;
+    if (comInclinacao) {
+      detalhe = `Com ${formatarInclinacao(o.inclinacao)} de inclinação · ritmo real ${formatarPace(paceUnid(realArred))}${rotuloPace}`;
+    } else {
+      const paceReal = paceUnid(realArred);
+      detalhe =
+        formatarPace(paceReal) !== formatarPace(valor)
+          ? `Em ${formatarVelocidade(naEsteira)} ${rotuloEsteira} o pace fica ${formatarPace(paceReal)}${rotuloPace}`
+          : `Exato: ${formatarVelocidade(exata, 2)} ${rotuloEsteira}`;
+    }
+    if (calibrada) detalhe += ' · calibrada';
     return {
       entrada: formatarPace(valor),
       unidadeEntrada: rotuloPace,
@@ -121,29 +177,44 @@ export function calcular(modo: Modo, valor: number, up: UnidadePace, ue: Unidade
       unidadeSaida: rotuloEsteira,
       detalhe,
       segPorKm: paceEmSegPorKm(valor, up),
-      kmh: velocidadeEmKmh(exata, ue),
+      kmh: kmhEsforco,
+      esteiraDecimos: Math.round(naEsteira * 10),
+      paceEsforco: valor,
     };
   }
+
   const v = valor / 10;
-  const pace = paceDaVelocidade(v, ue, up);
-  const kmh = velocidadeEmKmh(v, ue);
+  const kmhReal = velocidadeEmKmh(v, ue) * o.fator;
+  const kmhEsforco = kmhReal * fi;
+  let detalhe = comInclinacao
+    ? `Com ${formatarInclinacao(o.inclinacao)} de inclinação · esforço de ${formatarPace(paceUnid(kmhEsforco))}${rotuloPace} no plano`
+    : `${formatarVelocidade((kmhReal * 1000) / 60, 0)} metros por minuto`;
+  if (calibrada) detalhe += ' · calibrada';
   return {
     entrada: formatarVelocidade(v),
     unidadeEntrada: rotuloEsteira,
-    saida: formatarPace(pace),
+    saida: formatarPace(paceUnid(kmhReal)),
     unidadeSaida: rotuloPace,
-    detalhe: `${formatarVelocidade(kmh * 1000 / 60, 0)} metros por minuto`,
-    segPorKm: 3600 / kmh,
-    kmh,
+    detalhe,
+    segPorKm: 3600 / kmhEsforco,
+    kmh: kmhEsforco,
+    esteiraDecimos: valor,
+    paceEsforco: paceUnid(kmhEsforco),
   };
 }
 
-/** Converte o valor da régua ao trocar de modo, para a tela continuar no mesmo ritmo. */
-export function converterValor(de: Modo, valor: number, up: UnidadePace, ue: UnidadeEsteira): number {
+/** Converte o valor da régua ao trocar de modo, para a esteira continuar na mesma velocidade. */
+export function converterValor(de: Modo, valor: number, up: UnidadePace, ue: UnidadeEsteira, o: Opcoes = SEM_AJUSTE): number {
+  const r = calcular(de, valor, up, ue, o);
   if (de === 'pace') {
     const f = FAIXA_ESTEIRA[ue];
-    return limitar(Math.round(arredondarEsteira(velocidadeDoPace(valor, up, ue)) * 10), f.min, f.max);
+    return limitar(r.esteiraDecimos, f.min, f.max);
   }
   const f = FAIXA_PACE[up];
-  return limitar(Math.round(paceDaVelocidade(valor / 10, ue, up)), f.min, f.max);
+  return limitar(Math.round(r.paceEsforco), f.min, f.max);
+}
+
+/** Velocidade para colocar na esteira (na unidade dela, já arredondada) para um pace em s/km. */
+export function esteiraParaPace(segPorKm: number, ue: UnidadeEsteira, o: Opcoes = SEM_AJUSTE): number {
+  return arredondarEsteira(velocidadeNaUnidade(3600 / segPorKm / fatorInclinacao(o.inclinacao) / o.fator, ue));
 }

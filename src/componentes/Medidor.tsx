@@ -1,7 +1,8 @@
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { limitar } from '../lib/pace';
 
 // Velocímetro em volta do número principal: o arco enche conforme a velocidade (3 a 25 km/h).
+// Dá para girar com o dedo, como um botão de volume: sentido horário = mais rápido.
 
 const CX = 100;
 const CY = 100;
@@ -29,11 +30,46 @@ const TRACOS = Array.from({ length: MAX - MIN + 1 }, (_, i) => {
   return { kmh, maior, p1, p2 };
 });
 
-export function Medidor({ kmh, children }: { kmh: number; children: ReactNode }) {
+const GRAUS_POR_PASSO = 4;
+
+export function Medidor({ kmh, children, onGirar }: { kmh: number; children: ReactNode; onGirar?: (passos: number) => void }) {
   const pct = limitar((kmh - MIN) / (MAX - MIN), 0, 1);
   const fim = ponto(INICIO + pct * ABERTURA);
+  const ref = useRef<HTMLDivElement>(null);
+  const giro = useRef<{ angulo: number; resto: number } | null>(null);
+
+  const angulo = (e: React.PointerEvent) => {
+    const r = ref.current!.getBoundingClientRect();
+    return (Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180) / Math.PI;
+  };
+
   return (
-    <div className="medidor">
+    <div
+      ref={ref}
+      className={`medidor ${onGirar ? 'giravel' : ''}`}
+      onPointerDown={(e) => {
+        if (!onGirar) return;
+        e.currentTarget.setPointerCapture(e.pointerId);
+        giro.current = { angulo: angulo(e), resto: 0 };
+      }}
+      onPointerMove={(e) => {
+        const g = giro.current;
+        if (!g || !onGirar) return;
+        const a = angulo(e);
+        let d = a - g.angulo;
+        if (d > 180) d -= 360;
+        if (d < -180) d += 360;
+        g.angulo = a;
+        g.resto += d;
+        const passos = Math.trunc(g.resto / GRAUS_POR_PASSO);
+        if (passos) {
+          g.resto -= passos * GRAUS_POR_PASSO;
+          onGirar(passos);
+        }
+      }}
+      onPointerUp={() => (giro.current = null)}
+      onPointerCancel={() => (giro.current = null)}
+    >
       <svg viewBox="0 0 200 200" aria-hidden="true">
         <defs>
           <linearGradient id="grad-arco" x1="0" y1="1" x2="1" y2="0">
