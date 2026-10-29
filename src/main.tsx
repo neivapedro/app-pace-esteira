@@ -4,6 +4,7 @@ import './estilos.css';
 import './estilos/vidro.css';
 import './estilos/paginas.css';
 import './estilos/executar.css';
+import './estilos/graficos.css';
 import { App } from './App';
 import { registrarServiceWorker } from './lib/versao';
 

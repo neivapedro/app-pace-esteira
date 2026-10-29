@@ -1,3 +1,4 @@
+import { historicoValido, niveisValidos, type PontoNivel, type Registro } from './historico';
 import { PALETAS } from './paletas';
 import { FAIXA_ESTEIRA, FAIXA_PACE, limitar, type Modo, type UnidadeEsteira, type UnidadePace } from './pace';
 import { treinosValidos, type Treino } from './treino';
@@ -5,7 +6,7 @@ import { usosValidos, type Usos } from './usos';
 
 // Tudo fica só no celular (localStorage). Sem login e sem internet.
 
-export type Aba = 'ritmo' | 'treino' | 'metas';
+export type Aba = 'ritmo' | 'treino' | 'metas' | 'painel';
 
 export interface Prova {
   km: number;
@@ -40,6 +41,10 @@ export interface Preferencias {
   nivel: Prova | null;
   zonasNaRegua: boolean;
   treinos: Treino[];
+  /** Treinos feitos (para o Painel). */
+  historico: Registro[];
+  /** Evolução do índice de forma. */
+  niveis: PontoNivel[];
 }
 
 const CHAVE = 'app-pace-esteira:preferencias';
@@ -66,6 +71,8 @@ export const PADRAO: Preferencias = {
   nivel: null,
   zonasNaRegua: true,
   treinos: [],
+  historico: [],
+  niveis: [],
 };
 
 function numeros(v: unknown): number[] {
@@ -90,7 +97,7 @@ export function lerPreferencias(): Preferencias {
   const fe = FAIXA_ESTEIRA[unidadeEsteira];
   const bool = (v: unknown, padrao: boolean) => (typeof v === 'boolean' ? v : padrao);
   return {
-    aba: p.aba === 'treino' || p.aba === 'metas' ? p.aba : 'ritmo',
+    aba: p.aba === 'treino' || p.aba === 'metas' || p.aba === 'painel' ? p.aba : 'ritmo',
     modo: p.modo === 'esteira' ? 'esteira' : 'pace',
     pace: typeof p.pace === 'number' ? limitar(Math.round(p.pace), fp.min, fp.max) : PADRAO.pace,
     esteira: typeof p.esteira === 'number' ? limitar(Math.round(p.esteira), fe.min, fe.max) : PADRAO.esteira,
@@ -111,6 +118,8 @@ export function lerPreferencias(): Preferencias {
     nivel: prova(p.nivel),
     zonasNaRegua: bool(p.zonasNaRegua, true),
     treinos: treinosValidos(p.treinos),
+    historico: historicoValido(p.historico),
+    niveis: niveisValidos(p.niveis),
   };
 }
 

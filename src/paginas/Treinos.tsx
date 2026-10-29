@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Folha } from '../componentes/Folha';
+import { PerfilTreino } from '../componentes/Graficos';
+import { IconeCiclo, IconeFechar, IconeMais, IconePlay, IconeSubir, IconeTrocar } from '../componentes/Icones';
 import { Repetidor } from '../componentes/Repetidor';
 import { opcoes, rotuloEsteira, rotuloPace, textoEsteira, textoPace, type Tela } from '../lib/contexto';
 import { calcular, formatarDuracao, limitar, paceEmSegPorKm, paceNaUnidade } from '../lib/pace';
@@ -11,6 +13,7 @@ import {
   NOME_BLOCO,
   novoId,
   ritmosBase,
+  expandir,
   textoDoTreino,
   totais,
   type Esforco,
@@ -55,15 +58,24 @@ export function Treinos({ p, setP, zonas, onAjustes, onComecar }: Props) {
       </header>
 
       <main className="pagina">
-        {p.treinos.length > 0 && (
-          <section>
-            <h2 className="secao">Meus treinos</h2>
+        <section>
+          <h2 className="secao">Meus treinos</h2>
+          {p.treinos.length === 0 ? (
+            <div className="vazio vidro">
+              <div className="previa-mini" aria-hidden="true">
+                <PerfilTreino etapas={expandir(lista[1])} zonas={zonas} />
+              </div>
+              <b>Nenhum treino ainda</b>
+              <p>Toque num modelo abaixo para copiar e ajustar do seu jeito.</p>
+            </div>
+          ) : (
             <div className="lista">
               {p.treinos.map((t) => (
                 <div key={t.id} className="treino vidro">
                   <button className="treino-info" onClick={() => setEditando(t.id)}>
                     <b>{t.nome}</b>
                     <small>{resumo(t)}</small>
+                    <PerfilTreino etapas={expandir(t)} zonas={zonas} mini />
                   </button>
                   <button
                     className="play"
@@ -73,15 +85,13 @@ export function Treinos({ p, setP, zonas, onAjustes, onComecar }: Props) {
                       onComecar(t);
                     }}
                   >
-                    <svg viewBox="0 0 24 24" width="22" height="22">
-                      <path d="M8 5.5v13l11-6.5z" fill="currentColor" />
-                    </svg>
+                    <IconePlay tam={22} />
                   </button>
                 </div>
               ))}
             </div>
-          </section>
-        )}
+          )}
+        </section>
 
         <section>
           <h2 className="secao">Modelos</h2>
@@ -95,9 +105,10 @@ export function Treinos({ p, setP, zonas, onAjustes, onComecar }: Props) {
                 <span className="treino-info">
                   <b>{m.nome}</b>
                   <small>{resumo(m)}</small>
+                  <PerfilTreino etapas={expandir(m)} zonas={zonas} mini />
                 </span>
                 <span className="mais" aria-hidden="true">
-                  +
+                  <IconeMais tam={18} />
                 </span>
               </button>
             ))}
@@ -116,7 +127,7 @@ export function Treinos({ p, setP, zonas, onAjustes, onComecar }: Props) {
                 <small>Monte do seu jeito</small>
               </span>
               <span className="mais" aria-hidden="true">
-                +
+                <IconeMais tam={18} />
               </span>
             </button>
           </div>
@@ -126,6 +137,7 @@ export function Treinos({ p, setP, zonas, onAjustes, onComecar }: Props) {
       {treino && (
         <Editor
           p={p}
+          zonas={zonas}
           setP={setP}
           treino={treino}
           onFechar={() => setEditando(null)}
@@ -139,7 +151,7 @@ export function Treinos({ p, setP, zonas, onAjustes, onComecar }: Props) {
   );
 }
 
-function Editor({ p, setP, treino, onFechar, onComecar }: Tela & { treino: Treino; onFechar: () => void; onComecar: () => void }) {
+function Editor({ p, setP, treino, zonas, onFechar, onComecar }: Tela & { treino: Treino; zonas: Zona[] | null; onFechar: () => void; onComecar: () => void }) {
   const mudar = (f: (t: Treino) => Treino) => setP((a) => ({ ...a, treinos: a.treinos.map((t) => (t.id === treino.id ? f(t) : t)) }));
   const mudarPasso = (id: string, f: (x: Passo) => Passo) => mudar((t) => ({ ...t, passos: t.passos.map((x) => (x.id === id ? f(x) : x)) }));
   const tot = totais(treino);
@@ -167,6 +179,10 @@ function Editor({ p, setP, treino, onFechar, onComecar }: Tela & { treino: Trein
             onChange={(e) => mudar((t) => ({ ...t, nome: e.target.value }))}
           />
 
+          <div className="perfil-editor">
+            <PerfilTreino etapas={expandir(treino)} zonas={zonas} />
+          </div>
+
           <div className="passos">
             {treino.passos.map((x, i) => (
               <div key={x.id} className="passo-cartao">
@@ -182,9 +198,7 @@ function Editor({ p, setP, treino, onFechar, onComecar }: Tela & { treino: Trein
                       }}
                     >
                       {NOME_BLOCO[x.bloco]}
-                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M8 9l4-4 4 4M8 15l4 4 4-4" />
-                      </svg>
+                      <IconeCiclo tam={14} />
                     </button>
                   ) : (
                     <div className="serie-vezes">
@@ -210,11 +224,11 @@ function Editor({ p, setP, treino, onFechar, onComecar }: Tela & { treino: Trein
                           })
                         }
                       >
-                        ↑
+                        <IconeSubir tam={16} />
                       </button>
                     )}
                     <button aria-label="Apagar" onClick={() => mudar((t) => ({ ...t, passos: t.passos.filter((y) => y.id !== x.id) }))}>
-                      ✕
+                      <IconeFechar tam={16} />
                     </button>
                   </div>
                 </div>
@@ -308,7 +322,7 @@ function EditorEsforco({ p, e, onChange, permiteZero }: { p: Tela['p']; e: Esfor
     <div className="esforco">
       <div className="esforco-col">
         <button className="medida-troca" onClick={trocar} aria-label="Trocar entre tempo e distância">
-          {tempo ? 'Tempo' : 'Distância'} ⇄
+          {tempo ? 'Tempo' : 'Distância'} <IconeTrocar tam={12} />
         </button>
         <div className="ajuste">
           <Repetidor className="mini" rotulo="Menos" onPasso={() => mudarMedida(-1)}>

@@ -1,26 +1,29 @@
+import { ArcoKpi, EspectroZonas, Linha } from '../componentes/Graficos';
 import { RodaTempo } from '../componentes/Roda';
-import { rotuloEsteira, rotuloPace, textoEsteira, textoPace, type Tela } from '../lib/contexto';
-import { FAIXA_PACE, formatarDuracao, formatarVelocidade, limitar, paceNaUnidade, PROVAS } from '../lib/pace';
-import type { Prova } from '../lib/preferencias';
+import { opcoes, rotuloEsteira, rotuloPace, textoEsteira, textoPace, type Tela } from '../lib/contexto';
+import { calcular, FAIXA_PACE, formatarDuracao, formatarVelocidade, limitar, paceNaUnidade, PROVAS } from '../lib/pace';
+import type { Aba, Preferencias, Prova } from '../lib/preferencias';
 import { vibrar } from '../lib/vibrar';
-import { DISTANCIAS, meioDaZona, preverTempo, vdot, type Zona } from '../lib/zonas';
+import { DISTANCIAS, meioDaZona, preverTempo, vdot, zonas as calcularZonas, type Zona } from '../lib/zonas';
 import { BotaoAjustes } from './Ritmo';
 
 interface Props extends Tela {
   zonas: Zona[] | null;
   onAjustes: () => void;
+  irPara: (aba: Aba, extra?: Partial<Preferencias>) => void;
 }
 
-export function Metas({ p, setP, zonas, onAjustes }: Props) {
-  // Leva um pace (s/km) para a aba Ritmo
+export function Metas({ p, setP, zonas, onAjustes, irPara }: Props) {
+  // Leva um pace (s/km) para a aba Ritmo, com a transição do número
   const usar = (segPorKm: number) => {
     vibrar();
     const f = FAIXA_PACE[p.unidadePace];
-    setP((a) => ({ ...a, aba: 'ritmo', modo: 'pace', pace: limitar(Math.round(paceNaUnidade(segPorKm, a.unidadePace)), f.min, f.max) }));
+    irPara('ritmo', { modo: 'pace', pace: limitar(Math.round(paceNaUnidade(segPorKm, p.unidadePace)), f.min, f.max) });
   };
 
   const metaPace = p.meta.segundos / p.meta.km;
   const indice = p.nivel ? vdot(p.nivel.km, p.nivel.segundos) : null;
+  const ritmoAtual = calcular(p.modo, p.modo === 'pace' ? p.pace : p.esteira, p.unidadePace, p.unidadeEsteira, opcoes(p)).segPorKm;
 
   return (
     <>
@@ -39,7 +42,7 @@ export function Metas({ p, setP, zonas, onAjustes }: Props) {
           <div className="resultado-meta">
             <div>
               <span className="rotulo">Pace</span>
-              <strong className="num">
+              <strong className="num" style={{ viewTransitionName: 'pace-destaque' }}>
                 {textoPace(p, metaPace)}
                 <small>{rotuloPace(p)}</small>
               </strong>
@@ -61,9 +64,12 @@ export function Metas({ p, setP, zonas, onAjustes }: Props) {
           <h2>Seu nível e zonas</h2>
           {!p.nivel || !indice || !zonas ? (
             <>
+              <div className="previa-mini" aria-hidden="true">
+                <EspectroZonas zonas={calcularZonas(42)} marcadores={[]} formatar={(s) => textoPace(p, s)} />
+              </div>
               <p className="nota-texto">
-                Informe o tempo de uma prova recente (ou um treino forte no tempo). O app calcula seu índice de forma, prevê seus tempos nas outras distâncias e
-                monta suas zonas de treino.
+                Informe o tempo de uma prova recente (ou um treino forte no tempo). O app calcula seu índice de forma, prevê seus tempos e monta suas zonas de
+                treino.
               </p>
               <button
                 className="folha-ok"
@@ -76,7 +82,7 @@ export function Metas({ p, setP, zonas, onAjustes }: Props) {
               </button>
             </>
           ) : (
-            <Nivel p={p} setP={setP} nivel={p.nivel} indice={indice} zonas={zonas} usar={usar} />
+            <Nivel p={p} setP={setP} nivel={p.nivel} indice={indice} zonas={zonas} usar={usar} metaPace={metaPace} ritmoAtual={ritmoAtual} />
           )}
         </section>
 
@@ -88,25 +94,60 @@ export function Metas({ p, setP, zonas, onAjustes }: Props) {
   );
 }
 
-function Nivel({ p, setP, nivel, indice, zonas, usar }: Tela & { nivel: Prova; indice: number; zonas: Zona[]; usar: (s: number) => void }) {
+interface NivelProps extends Tela {
+  nivel: Prova;
+  indice: number;
+  zonas: Zona[];
+  usar: (s: number) => void;
+  metaPace: number;
+  ritmoAtual: number;
+}
+
+function Nivel({ p, setP, nivel, indice, zonas, usar, metaPace, ritmoAtual }: NivelProps) {
   const mudar = (n: Partial<Prova>) => setP((a) => ({ ...a, nivel: { ...nivel, ...n } }));
+  const previsoes = PROVAS.map((x) => {
+    const t = preverTempo(indice, x.km);
+    return { ...x, t, pace: t / x.km };
+  });
   return (
     <>
       <p className="cartao-sub">Prova recente</p>
       <Distancias valor={nivel.km} onChange={(km) => mudar({ km })} />
       <RodaTempo segundos={nivel.segundos} onChange={(segundos) => mudar({ segundos })} />
 
-      <div className="indice">
-        <span className="rotulo">Índice de forma (VDOT)</span>
-        <strong className="num">{formatarVelocidade(indice, 1)}</strong>
+      <div className="indice-kpi">
+        <ArcoKpi valor={indice} min={30} max={80} texto={formatarVelocidade(indice, 1)} />
+        <div>
+          <span className="rotulo">Índice de forma</span>
+          <p>VDOT de Daniels. Quanto maior, mais rápido. Sobe com treino e com provas melhores.</p>
+        </div>
       </div>
 
-      <p className="cartao-sub">Tempos previstos</p>
+      <p className="cartao-sub">Suas zonas · onde estão o Ritmo e a meta</p>
+      <EspectroZonas
+        zonas={zonas}
+        marcadores={[
+          { pace: ritmoAtual, rotulo: 'Ritmo' },
+          { pace: metaPace, rotulo: 'Meta' },
+        ]}
+        formatar={(s) => textoPace(p, s)}
+      />
+
+      <p className="cartao-sub">Tempos previstos · toque e arraste no gráfico</p>
+      <Linha
+        inverter
+        altura={160}
+        pontos={previsoes.map((x) => ({
+          y: x.pace,
+          rotulo: x.nome,
+          valor: `${formatarDuracao(x.t)} · ${textoPace(p, x.pace)}${rotuloPace(p)}`,
+        }))}
+      />
       <div className="provas provas-previstas">
-        {PROVAS.map((x) => (
+        {previsoes.map((x) => (
           <div key={x.nome} className="prova">
             <span>{x.nome}</span>
-            <strong className="num">{formatarDuracao(preverTempo(indice, x.km))}</strong>
+            <strong className="num">{formatarDuracao(x.t)}</strong>
           </div>
         ))}
       </div>
