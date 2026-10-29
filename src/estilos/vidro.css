@@ -46,9 +46,9 @@ button.vidro:active {
   position: relative;
   flex: none;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(var(--n, 4), 1fr);
   padding: 5px;
-  margin: 0 8px;
+  margin: 0 4px;
   border-radius: 999px;
 }
 
@@ -57,7 +57,7 @@ button.vidro:active {
   top: 5px;
   bottom: 5px;
   left: 5px;
-  width: calc((100% - 10px) / 3);
+  width: calc((100% - 10px) / var(--n, 4));
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.13);
   box-shadow:
@@ -172,11 +172,36 @@ button.vidro:active {
 
 .regua-faixa {
   position: absolute;
-  top: 5px;
-  height: 4px;
-  border-radius: 4px;
-  opacity: 0.85;
+  top: 4px;
+  height: 6px;
+  border-radius: 6px;
+  opacity: 0.9;
+  box-shadow: 0 0 10px -1px currentColor;
   pointer-events: none;
+}
+
+/* Nome da zona em cima do marcador enquanto desliza */
+.regua-balao {
+  position: absolute;
+  left: 50%;
+  top: -14px;
+  transform: translate(-50%, 6px) scale(0.9);
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #0b0b0e;
+  background: var(--zc);
+  box-shadow: 0 4px 16px -4px var(--zc);
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: opacity 0.25s, transform 0.35s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+.regua-balao.visivel {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
 }
 
 .inclinacao-valor {

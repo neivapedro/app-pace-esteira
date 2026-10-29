@@ -1,11 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { PerfilTreino } from '../componentes/Graficos';
+import { IconeAnterior, IconeFechar, IconeMudo, IconePausa, IconePlay, IconeProximo, IconeSom } from '../componentes/Icones';
 import { NumeroRolante } from '../componentes/NumeroRolante';
+import { Resumo } from '../componentes/Resumo';
 import { rotuloEsteira, rotuloPace, textoEsteira, textoPace, type Tela } from '../lib/contexto';
 import { formatarDuracao, formatarInclinacao } from '../lib/pace';
 import { manterTelaAcesa } from '../lib/tela-acesa';
-import { etapaNoTempo, expandir, formatarDistancia, type Etapa, type Treino } from '../lib/treino';
+import { registrar, type Registro } from '../lib/historico';
+import { etapaNoTempo, expandir, formatarDistancia, novoId, type Etapa, type Treino } from '../lib/treino';
 import { vibrar } from '../lib/vibrar';
 import { bipe, calar, falar, lerNumero, prepararAudio } from '../lib/voz';
+import type { Zona } from '../lib/zonas';
 
 // Treino em andamento: mostra a velocidade de cada etapa, conta o tempo e avisa
 // (voz, bipes) antes de cada troca. O relógio é pelo horário real, então não se perde
@@ -17,15 +22,19 @@ interface Props extends Tela {
   treino: Treino;
   onFechar: () => void;
   onCor: (kmh: number | null) => void;
+  zonas: Zona[] | null;
+  /** Guarda o treino feito no histórico (Painel). */
+  onRegistrar: (r: Registro) => void;
 }
 
 const CONTAGEM = 3;
 
-export function Executar({ p, setP, treino, onFechar, onCor }: Props) {
+export function Executar({ p, setP, treino, onFechar, onCor, zonas, onRegistrar }: Props) {
   const etapas = useMemo(() => expandir(treino), [treino]);
   const total = etapas.reduce((s, e) => s + e.segundos, 0);
   const [estado, setEstado] = useState<Estado>('pronto');
   const [, setTique] = useState(0);
+  const [registro, setRegistro] = useState<Registro | null>(null);
   // Tempo acumulado antes da última partida + horário da partida
   const acumulado = useRef(0);
   const partida = useRef<number | null>(null);
@@ -35,7 +44,7 @@ export function Executar({ p, setP, treino, onFechar, onCor }: Props) {
   const voz = p.vozTreino;
 
   const decorrido = () => acumulado.current + (partida.current !== null ? (performance.now() - partida.current) / 1000 : 0);
-  const s = estado === 'fim' ? total : decorrido();
+  const s = estado === 'fim' ? (registro?.segundos ?? total) : decorrido();
   const idx = estado === 'fim' ? -1 : Math.max(0, etapaNoTempo(etapas, s));
   const etapa: Etapa | undefined = etapas[idx];
   const proxima: Etapa | undefined = etapas[idx + 1];
@@ -90,6 +99,9 @@ export function Executar({ p, setP, treino, onFechar, onCor }: Props) {
     if (s >= total) {
       acumulado.current = total;
       partida.current = null;
+      const r = registrar(treino.nome, etapas, total, Date.now(), novoId());
+      onRegistrar(r);
+      setRegistro(r);
       setEstado('fim');
       bipe(true);
       dizer('Treino concluído. Parabéns!');
@@ -150,6 +162,18 @@ export function Executar({ p, setP, treino, onFechar, onCor }: Props) {
   const sair = () => {
     if (estado === 'rodando' || estado === 'pausado') {
       if (!confirm('Encerrar o treino?')) return;
+      // Mais de 1 minuto feito: guarda o que foi feito e mostra o resumo
+      const feito = decorrido();
+      if (feito >= 60) {
+        acumulado.current = feito;
+        partida.current = null;
+        calar();
+        const r = registrar(treino.nome, etapas, feito, Date.now(), novoId());
+        onRegistrar(r);
+        setRegistro(r);
+        setEstado('fim');
+        return;
+      }
     }
     onFechar();
   };
@@ -161,10 +185,8 @@ export function Executar({ p, setP, treino, onFechar, onCor }: Props) {
   return (
     <div className={`executar ${etapa ? `int-${etapa.intensidade}` : ''}`}>
       <header className="executar-topo">
-        <button className="icone-botao vidro" aria-label="Encerrar" onClick={sair}>
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
-            <path d="M6 6l12 12M18 6L6 18" />
-          </svg>
+        <button className="icone-botao vidro" aria-label="Encerrar" onClick={estado === 'fim' ? onFechar : sair}>
+          <IconeFechar tam={20} />
         </button>
         <div className="executar-nome">
           <b>{treino.nome}</b>
@@ -182,34 +204,18 @@ export function Executar({ p, setP, treino, onFechar, onCor }: Props) {
             if (voz) calar();
           }}
         >
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 9v6h4l5 4V5L8 9z" />
-            {voz ? <path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" /> : <path d="M17 9l5 6M22 9l-5 6" />}
-          </svg>
+          {voz ? <IconeSom tam={20} /> : <IconeMudo tam={20} />}
         </button>
       </header>
 
-      <div className="faixa-treino" aria-hidden="true">
-        {etapas.map((e, i) => (
-          <i
-            key={i}
-            className={`seg-${e.intensidade} ${i < idx || estado === 'fim' ? 'feito' : i === idx ? 'atual' : ''}`}
-            style={{ flexGrow: e.segundos }}
-          />
-        ))}
-      </div>
+      {estado !== 'fim' && (
+        <div className="perfil-andamento">
+          <PerfilTreino etapas={etapas} zonas={zonas} progresso={s} />
+        </div>
+      )}
 
-      {estado === 'fim' ? (
-        <main className="executar-fim">
-          <div className="trofeu">🏁</div>
-          <h2>Treino concluído!</h2>
-          <p className="num">
-            {formatarDuracao(total)} · {formatarDistancia(etapas.reduce((m, e) => m + e.metros, 0))}
-          </p>
-          <button className="folha-ok" onClick={onFechar}>
-            Fechar
-          </button>
-        </main>
+      {estado === 'fim' && registro ? (
+        <Resumo p={p} registro={registro} zonas={zonas} onFechar={onFechar} />
       ) : (
         <main className="executar-palco">
           <div className="anel">
@@ -256,25 +262,13 @@ export function Executar({ p, setP, treino, onFechar, onCor }: Props) {
 
           <div className="controles vidro">
             <button aria-label="Etapa anterior" onClick={() => irPara(s - (etapa?.inicio ?? 0) > 3 ? idx : idx - 1)} disabled={estado === 'pronto' || estado === 'contando'}>
-              <svg viewBox="0 0 24 24" width="26" height="26">
-                <path d="M7 6v12M18 6l-9 6 9 6z" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-              </svg>
+              <IconeAnterior tam={26} />
             </button>
             <button className="principal" aria-label={estado === 'rodando' ? 'Pausar' : 'Começar'} onClick={estado === 'pronto' ? comecar : pausar} disabled={estado === 'contando'}>
-              {estado === 'rodando' ? (
-                <svg viewBox="0 0 24 24" width="34" height="34">
-                  <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor" />
-                </svg>
-              ) : (
-                <svg viewBox="0 0 24 24" width="34" height="34">
-                  <path d="M8 5v14l11-7z" fill="currentColor" />
-                </svg>
-              )}
+              {estado === 'rodando' ? <IconePausa tam={34} /> : <IconePlay tam={34} />}
             </button>
             <button aria-label="Próxima etapa" onClick={() => irPara(idx + 1)} disabled={estado === 'pronto' || estado === 'contando' || !proxima}>
-              <svg viewBox="0 0 24 24" width="26" height="26">
-                <path d="M17 6v12M6 6l9 6-9 6z" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-              </svg>
+              <IconeProximo tam={26} />
             </button>
           </div>
           {estado === 'pronto' && <p className="dica">Toque no play. Aumente o volume para ouvir os avisos.</p>}

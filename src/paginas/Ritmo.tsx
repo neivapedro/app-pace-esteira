@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Folha } from '../componentes/Folha';
+import { IconeAjustes, IconeInclinacao } from '../componentes/Icones';
 import { Medidor } from '../componentes/Medidor';
 import { NumeroRolante } from '../componentes/NumeroRolante';
 import { ESCALA_ESTEIRA, ESCALA_INCLINACAO, ESCALA_PACE, Regua, type FaixaRegua } from '../componentes/Regua';
@@ -119,7 +120,7 @@ export function Ritmo({ p, setP, zonas, onAjustes }: Props) {
       <main className="palco">
         <div className="entrada">
           <span className="rotulo">{p.modo === 'pace' ? (p.inclinacao > 0 ? 'Esforço de' : 'Seu pace') : 'Velocidade da esteira'}</span>
-          <div className="entrada-valor" key={p.modo}>
+          <div className="entrada-valor" key={p.modo} style={{ viewTransitionName: 'pace-destaque' }}>
             <NumeroRolante texto={r.entrada} className="num" />
             <span className="unid">{r.unidadeEntrada}</span>
           </div>
@@ -198,9 +199,7 @@ export function Ritmo({ p, setP, zonas, onAjustes }: Props) {
           )}
         </div>
         <button className={`inclinacao-botao vidro ${p.inclinacao > 0 ? 'ligada' : ''}`} onClick={() => setInclinacao(true)} aria-label="Inclinação da esteira">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 19h18L3 9z" />
-          </svg>
+          <IconeInclinacao tam={18} />
           <span className="num">{formatarInclinacao(p.inclinacao)}</span>
         </button>
       </section>
@@ -218,6 +217,7 @@ export function Ritmo({ p, setP, zonas, onAjustes }: Props) {
             valor={valor}
             onChange={mudarValor}
             faixas={faixas}
+            balao={zona ? { texto: zona.nome, cor: zona.cor } : null}
             onToque={() => !p.dicaVista && setP((a) => ({ ...a, dicaVista: true }))}
           />
           <Repetidor onPasso={() => mudarValor(valor + 1)} rotulo={`Mais ${passo}`}>
@@ -274,11 +274,7 @@ function Inclinacao({ p, setP, onFechar }: Tela & { onFechar: () => void }) {
 export function BotaoAjustes({ onClick }: { onClick: () => void }) {
   return (
     <button className="icone-botao vidro" aria-label="Ajustes" onClick={onClick}>
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-        <path d="M4 7h10M18 7h2M4 17h4M12 17h8" />
-        <circle cx="16" cy="7" r="2.2" />
-        <circle cx="10" cy="17" r="2.2" />
-      </svg>
+      <IconeAjustes />
     </button>
   );
 }

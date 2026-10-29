@@ -1,4 +1,4 @@
-import { memo, useEffect, useLayoutEffect, useMemo, useRef, type RefObject } from 'react';
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { formatarInclinacao, formatarPace, limitar } from '../lib/pace';
 import { vibrar } from '../lib/vibrar';
 
@@ -109,12 +109,22 @@ interface Props {
   onChange: (v: number) => void;
   onToque?: () => void;
   faixas?: FaixaRegua[];
+  /** Balão que aparece em cima do marcador enquanto a pessoa desliza (ex.: nome da zona). */
+  balao?: { texto: string; cor: string } | null;
 }
 
-export function Regua({ escala, min, max, valor, onChange, onToque, faixas }: Props) {
+export function Regua({ escala, min, max, valor, onChange, onToque, faixas, balao }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const L = escala.largura;
-  const { aoRolar, assumir } = useRolagem(ref, 'x', L, valor - min, max - min + 1, (i) => onChange(min + i));
+  const [deslizando, setDeslizando] = useState(false);
+  const fimDeslize = useRef(0);
+  const { aoRolar, assumir } = useRolagem(ref, 'x', L, valor - min, max - min + 1, (i) => {
+    onChange(min + i);
+    setDeslizando(true);
+    clearTimeout(fimDeslize.current);
+    fimDeslize.current = window.setTimeout(() => setDeslizando(false), 1100);
+  });
+  useEffect(() => () => clearTimeout(fimDeslize.current), []);
   const marcas = useMemo(() => <Marcas escala={escala} min={min} max={max} />, [escala, min, max]);
 
   const pegar = () => {
@@ -156,12 +166,17 @@ export function Regua({ escala, min, max, valor, onChange, onToque, faixas }: Pr
             <i
               key={i}
               className="regua-faixa"
-              style={{ left: `calc(50% - ${L / 2}px + ${(de - min) * L}px)`, width: (ate - de + 1) * L, background: f.cor }}
+              style={{ left: `calc(50% - ${L / 2}px + ${(de - min) * L}px)`, width: (ate - de + 1) * L, background: f.cor, color: f.cor }}
             />
           );
         })}
       </div>
       <div className="regua-ponteiro" aria-hidden="true" />
+      {balao && (
+        <span className={`regua-balao ${deslizando ? 'visivel' : ''}`} style={{ ['--zc' as string]: balao.cor }} aria-hidden="true">
+          {balao.texto}
+        </span>
+      )}
     </div>
   );
 }

@@ -73,6 +73,14 @@ export function zonaDoPace(lista: Zona[], segPorKm: number): Zona | undefined {
   return lista.find((z) => segPorKm >= z.rapido - 0.5 && segPorKm <= z.lento + 0.5);
 }
 
+/** Zona do pace, ou a mais próxima se cair entre duas (para colorir gráficos). */
+export function zonaProxima(lista: Zona[], segPorKm: number): Zona {
+  const dentro = zonaDoPace(lista, segPorKm);
+  if (dentro) return dentro;
+  const dist = (z: Zona) => Math.min(Math.abs(segPorKm - z.rapido), Math.abs(segPorKm - z.lento));
+  return lista.reduce((a, b) => (dist(b) < dist(a) ? b : a));
+}
+
 /** Meio da zona (s/km), para montar treinos. */
 export function meioDaZona(z: Zona): number {
   return (z.rapido + z.lento) / 2;

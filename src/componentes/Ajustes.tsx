@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { Tela } from '../lib/contexto';
 import {
   arredondarEsteira,
@@ -16,6 +17,7 @@ import { amostra, PALETAS } from '../lib/paletas';
 import { vibrar } from '../lib/vibrar';
 import { vozDisponivel } from '../lib/voz';
 import { Folha } from './Folha';
+import { IconeEsteira, IconeInfo, IconePaleta, IconeRegua, IconeSom } from './Icones';
 import { Repetidor } from './Repetidor';
 
 export function Ajustes({ p, setP, onFechar }: Tela & { onFechar: () => void }) {
@@ -44,8 +46,7 @@ export function Ajustes({ p, setP, onFechar }: Tela & { onFechar: () => void }) 
     <Folha titulo="Ajustes" onFechar={onFechar}>
       {(fechar) => (
         <>
-          <div className="cores">
-            <span>Cores</span>
+          <Grupo icone={<IconePaleta tam={18} />} titulo="Aparência">
             <div className="paletas">
               {PALETAS.map((x) => (
                 <button
@@ -62,43 +63,34 @@ export function Ajustes({ p, setP, onFechar }: Tela & { onFechar: () => void }) 
                 </button>
               ))}
             </div>
-          </div>
+          </Grupo>
 
-          <div className="linha">
-            <span>Pace em</span>
-            <Opcoes
-              valor={p.unidadePace}
-              opcoes={[
-                ['km', 'min/km'],
-                ['mi', 'min/milha'],
-              ]}
-              onChange={mudarUnidadePace}
-            />
-          </div>
+          <Grupo icone={<IconeRegua tam={18} />} titulo="Unidades">
+            <div className="linha">
+              <span>Pace em</span>
+              <Opcoes
+                valor={p.unidadePace}
+                opcoes={[
+                  ['km', 'min/km'],
+                  ['mi', 'min/milha'],
+                ]}
+                onChange={mudarUnidadePace}
+              />
+            </div>
+            <div className="linha">
+              <span>Esteira em</span>
+              <Opcoes
+                valor={p.unidadeEsteira}
+                opcoes={[
+                  ['kmh', 'km/h'],
+                  ['mph', 'mph'],
+                ]}
+                onChange={mudarUnidadeEsteira}
+              />
+            </div>
+          </Grupo>
 
-          <div className="linha">
-            <span>Esteira em</span>
-            <Opcoes
-              valor={p.unidadeEsteira}
-              opcoes={[
-                ['kmh', 'km/h'],
-                ['mph', 'mph'],
-              ]}
-              onChange={mudarUnidadeEsteira}
-            />
-          </div>
-
-          <Chave rotulo="Vibrar ao ajustar" valor={p.vibracao} onChange={(v) => setP((a) => ({ ...a, vibracao: v }))} />
-          <Chave rotulo="Manter a tela acesa" valor={p.telaAcesa} onChange={(v) => setP((a) => ({ ...a, telaAcesa: v }))} />
-          {vozDisponivel() && (
-            <>
-              <Chave rotulo="Falar a velocidade ao parar a régua" valor={p.falarRegua} onChange={(v) => setP((a) => ({ ...a, falarRegua: v }))} />
-              <Chave rotulo="Avisos falados no treino" valor={p.vozTreino} onChange={(v) => setP((a) => ({ ...a, vozTreino: v }))} />
-            </>
-          )}
-
-          <div className="calibrar">
-            <span>Calibrar a esteira</span>
+          <Grupo icone={<IconeEsteira tam={18} />} titulo="Calibrar a esteira">
             <p className="nota-texto">Quando a esteira mostra 10 km, quanto marca seu relógio (com sensor no tênis) ou uma pista medida?</p>
             <div className="ajuste grande">
               <Repetidor className="mini" rotulo="Menos 50 metros" onPasso={() => mudarRelogio(relogio - 0.05)}>
@@ -119,19 +111,27 @@ export function Ajustes({ p, setP, onFechar }: Tela & { onFechar: () => void }) 
                 </button>
               )}
             </p>
-          </div>
+          </Grupo>
 
-          <div className="nota">
-            <strong>Dica de treino</strong>
-            <p>Na esteira não há vento nem subida. Muitos corredores usam 1% de inclinação para chegar mais perto do esforço da rua.</p>
-          </div>
+          <Grupo icone={<IconeSom tam={18} />} titulo="Toque, tela e voz">
+            <Chave rotulo="Vibrar ao ajustar" valor={p.vibracao} onChange={(v) => setP((a) => ({ ...a, vibracao: v }))} />
+            <Chave rotulo="Manter a tela acesa" valor={p.telaAcesa} onChange={(v) => setP((a) => ({ ...a, telaAcesa: v }))} />
+            {vozDisponivel() && (
+              <>
+                <Chave rotulo="Falar a velocidade ao parar a régua" valor={p.falarRegua} onChange={(v) => setP((a) => ({ ...a, falarRegua: v }))} />
+                <Chave rotulo="Avisos falados no treino" valor={p.vozTreino} onChange={(v) => setP((a) => ({ ...a, vozTreino: v }))} />
+              </>
+            )}
+          </Grupo>
 
-          <div className="nota">
-            <strong>Deixar na Tela de Início</strong>
-            <p>
-              No Safari, toque em <b>Compartilhar</b> e depois em <b>Adicionar à Tela de Início</b>. O app abre em tela cheia e funciona sem internet.
+          <Grupo icone={<IconeInfo tam={18} />} titulo="Dicas">
+            <p className="nota-texto">
+              <b>Treino:</b> na esteira não há vento nem subida. Muitos corredores usam 1% de inclinação para chegar mais perto do esforço da rua.
             </p>
-          </div>
+            <p className="nota-texto">
+              <b>Tela de Início:</b> no Safari, toque em Compartilhar e depois em Adicionar à Tela de Início. O app abre em tela cheia e funciona sem internet.
+            </p>
+          </Grupo>
 
           <p className="versao">Versão {__VERSAO_APP__}</p>
           <button className="folha-ok" onClick={fechar}>
@@ -140,6 +140,18 @@ export function Ajustes({ p, setP, onFechar }: Tela & { onFechar: () => void }) 
         </>
       )}
     </Folha>
+  );
+}
+
+function Grupo({ icone, titulo, children }: { icone: ReactNode; titulo: string; children: ReactNode }) {
+  return (
+    <section className="grupo">
+      <h3>
+        <span className="grupo-icone">{icone}</span>
+        {titulo}
+      </h3>
+      <div className="grupo-corpo">{children}</div>
+    </section>
   );
 }
 

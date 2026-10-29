@@ -46,8 +46,8 @@
   --fundo: #06060b;
   --tinta: #fff;
   --texto: #f6f6fb;
-  --texto-2: rgba(246, 246, 251, 0.62);
-  --texto-3: rgba(246, 246, 251, 0.38);
+  --texto-2: rgba(246, 246, 251, 0.74);
+  --texto-3: rgba(246, 246, 251, 0.55);
   --vidro: rgba(255, 255, 255, 0.06);
   --vidro-borda: rgba(255, 255, 255, 0.09);
   --cor: hsl(var(--h) var(--s) var(--lum));
