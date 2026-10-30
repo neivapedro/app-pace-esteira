@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { confirmar } from '../componentes/Avisos';
 import { PerfilTreino } from '../componentes/Graficos';
 import { IconeAnterior, IconeFechar, IconeMudo, IconePausa, IconePlay, IconeProximo, IconeSom } from '../componentes/Icones';
 import { NumeroRolante } from '../componentes/NumeroRolante';
@@ -159,9 +160,15 @@ export function Executar({ p, setP, treino, onFechar, onCor, zonas, onRegistrar 
     setTique((n) => n + 1);
   };
 
-  const sair = () => {
+  const sair = async () => {
     if (estado === 'rodando' || estado === 'pausado') {
-      if (!confirm('Encerrar o treino?')) return;
+      const ok = await confirmar({
+        titulo: 'Encerrar o treino?',
+        texto: decorrido() >= 60 ? 'O que você já fez fica salvo no Painel.' : 'Com menos de 1 minuto, o treino não é salvo.',
+        confirmar: 'Encerrar',
+        perigo: true,
+      });
+      if (!ok) return;
       // Mais de 1 minuto feito: guarda o que foi feito e mostra o resumo
       const feito = decorrido();
       if (feito >= 60) {
@@ -243,7 +250,7 @@ export function Executar({ p, setP, treino, onFechar, onCor, zonas, onRegistrar 
           </div>
 
           {proxima ? (
-            <div className="proxima vidro">
+            <div className="proxima superficie">
               <span className="rotulo">Depois</span>
               <b>
                 {proxima.nome}
@@ -254,7 +261,7 @@ export function Executar({ p, setP, treino, onFechar, onCor, zonas, onRegistrar 
               </span>
             </div>
           ) : (
-            <div className="proxima vidro">
+            <div className="proxima superficie">
               <span className="rotulo">Depois</span>
               <b>Fim do treino</b>
             </div>

@@ -24,12 +24,12 @@
 }
 
 .executar-nome b {
-  font-size: 17px;
-  font-weight: 750;
+  font-size: var(--t-corpo);
+  font-weight: var(--peso-forte);
 }
 
 .executar-nome small {
-  font-size: 13px;
+  font-size: var(--t-apoio);
   color: var(--texto-2);
 }
 
@@ -39,7 +39,7 @@
 
 .perfil-andamento {
   padding: 10px 12px 8px;
-  border-radius: 20px;
+  border-radius: var(--r-xl);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--vidro-borda);
 }
@@ -87,7 +87,7 @@
   stroke: var(--cor);
   stroke-width: 5;
   stroke-linecap: round;
-  transition: stroke-dashoffset 0.25s linear;
+  transition: stroke-dashoffset var(--m-padrao) linear;
   filter: drop-shadow(0 0 6px var(--cor));
 }
 
@@ -103,14 +103,14 @@
 }
 
 .anel-miolo small {
-  font-size: 13px;
+  font-size: var(--t-apoio);
   color: var(--texto-2);
 }
 
 .restante {
   margin-top: 4px;
   font-size: calc(var(--tam) * 0.11);
-  font-weight: 750;
+  font-weight: var(--peso-forte);
   font-variant-numeric: tabular-nums;
 }
 
@@ -126,16 +126,16 @@
   align-items: center;
   gap: 2px;
   padding: 12px;
-  border-radius: 24px;
+  border-radius: var(--r-xl);
 }
 
 .proxima b {
-  font-size: 17px;
+  font-size: var(--t-corpo);
 }
 
 .proxima .num {
   color: var(--texto-2);
-  font-weight: 650;
+  font-weight: var(--peso-regular);
 }
 
 .controles {
@@ -144,7 +144,7 @@
   justify-content: center;
   gap: 22px;
   padding: 8px 22px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
 }
 
 .controles button {
@@ -154,11 +154,11 @@
   display: grid;
   place-items: center;
   color: var(--texto);
-  transition: transform 0.3s cubic-bezier(0.3, 1.5, 0.5, 1), opacity 0.2s;
+  transition: transform var(--m-padrao) cubic-bezier(0.3, 1.5, 0.5, 1), opacity var(--m-rapido);
 }
 
 .controles button:active {
-  transform: scale(0.88);
+  transform: scale(0.96);
 }
 
 .controles button:disabled {

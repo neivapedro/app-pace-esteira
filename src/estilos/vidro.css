@@ -15,11 +15,11 @@
 }
 
 button.vidro {
-  transition: transform 0.35s cubic-bezier(0.3, 1.5, 0.5, 1), background 0.2s;
+  transition: transform var(--m-enfase) cubic-bezier(0.3, 1.5, 0.5, 1), background var(--m-rapido);
 }
 
 button.vidro:active {
-  transform: scale(0.94);
+  transform: scale(0.96);
 }
 
 .chip.vidro.ativo {
@@ -49,7 +49,7 @@ button.vidro:active {
   grid-template-columns: repeat(var(--n, 4), 1fr);
   padding: 5px;
   margin: 0 4px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
 }
 
 .abas-lente {
@@ -58,13 +58,13 @@ button.vidro:active {
   bottom: 5px;
   left: 5px;
   width: calc((100% - 10px) / var(--n, 4));
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: rgba(255, 255, 255, 0.13);
   box-shadow:
     inset 0 1px 0.5px rgba(255, 255, 255, 0.35),
     inset 0 -1px 1px rgba(255, 255, 255, 0.05);
   transform: translateX(calc(var(--i) * 100%));
-  transition: transform 0.5s cubic-bezier(0.3, 1.35, 0.5, 1);
+  transition: transform var(--m-enfase) cubic-bezier(0.3, 1.35, 0.5, 1);
 }
 
 .abas button {
@@ -76,10 +76,10 @@ button.vidro:active {
   align-items: center;
   justify-content: center;
   gap: 2px;
-  font-size: 11px;
-  font-weight: 650;
+  font-size: var(--t-rotulo);
+  font-weight: var(--peso-regular);
   color: var(--texto-2);
-  transition: color 0.25s, transform 0.35s cubic-bezier(0.3, 1.5, 0.5, 1);
+  transition: color var(--m-padrao), transform var(--m-enfase) cubic-bezier(0.3, 1.5, 0.5, 1);
 }
 
 .abas button.ativo {
@@ -134,9 +134,9 @@ button.vidro:active {
   display: inline-block;
   margin-right: 6px;
   padding: 1px 8px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 800;
+  border-radius: var(--r-pill);
+  font-size: var(--t-legenda);
+  font-weight: var(--peso-max);
   color: #0b0b0e;
   background: var(--zc);
   box-shadow: 0 0 12px -2px var(--zc);
@@ -153,12 +153,12 @@ button.vidro:active {
   flex: none;
   height: 40px;
   padding: 0 12px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 14px;
-  font-weight: 750;
+  font-size: var(--t-apoio);
+  font-weight: var(--peso-forte);
   color: var(--texto-2);
 }
 
@@ -187,9 +187,9 @@ button.vidro:active {
   top: -14px;
   transform: translate(-50%, 6px) scale(0.9);
   padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 800;
+  border-radius: var(--r-pill);
+  font-size: var(--t-legenda);
+  font-weight: var(--peso-max);
   color: #0b0b0e;
   background: var(--zc);
   box-shadow: 0 4px 16px -4px var(--zc);
@@ -213,14 +213,14 @@ button.vidro:active {
 }
 
 .inclinacao-valor .rolante {
-  font-size: 64px;
-  font-weight: 850;
-  letter-spacing: -0.03em;
+  font-size: var(--t-display);
+  font-weight: var(--peso-max);
+  letter-spacing: var(--ls-numero);
 }
 
 .inclinacao-valor > span:last-child {
-  font-size: 28px;
-  font-weight: 750;
+  font-size: var(--t-numero);
+  font-weight: var(--peso-forte);
   color: var(--texto-2);
 }
 
@@ -232,7 +232,7 @@ button.vidro:active {
 
 .nota-texto {
   margin: 10px 2px;
-  font-size: 14px;
+  font-size: var(--t-apoio);
   line-height: 1.45;
   color: var(--texto-2);
 }
@@ -250,16 +250,16 @@ button.vidro:active {
 
 .botao-secundario {
   height: 52px;
-  border-radius: 16px;
-  font-size: 16px;
-  font-weight: 700;
+  border-radius: var(--r-lg);
+  font-size: var(--t-corpo);
+  font-weight: var(--peso-forte);
 }
 
 .botao-texto {
   display: block;
   margin: 14px auto 0;
-  font-size: 14px;
-  font-weight: 650;
+  font-size: var(--t-apoio);
+  font-weight: var(--peso-regular);
   color: var(--texto-2);
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -282,8 +282,8 @@ button.vidro:active {
 .ajuste .num {
   min-width: 64px;
   text-align: center;
-  font-weight: 750;
-  font-size: 16px;
+  font-weight: var(--peso-forte);
+  font-size: var(--t-corpo);
 }
 
 .ajuste.grande {
@@ -292,7 +292,7 @@ button.vidro:active {
 
 .ajuste.grande .num {
   min-width: 120px;
-  font-size: 24px;
+  font-size: var(--t-numero);
 }
 
 .mini {
@@ -302,28 +302,28 @@ button.vidro:active {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font-size: 20px;
+  font-size: var(--t-secao);
   line-height: 1;
   background: rgba(255, 255, 255, 0.09);
-  transition: transform 0.1s;
+  transition: transform var(--m-rapido);
   -webkit-user-select: none;
   user-select: none;
 }
 
 .mini:active {
-  transform: scale(0.88);
+  transform: scale(0.96);
   background: var(--cor-suave);
 }
 
 .calibrar {
   padding: 14px 0;
   border-bottom: 1px solid var(--vidro-borda);
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--t-corpo);
+  font-weight: var(--peso-regular);
 }
 
 .calibrar .nota-texto {
-  font-weight: 500;
+  font-weight: var(--peso-regular);
 }
 
 /* Rótulo dentro do velocímetro: uma linha só, encolhe em telas pequenas */

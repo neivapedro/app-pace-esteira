@@ -88,7 +88,7 @@ export function Resumo({ p, registro, zonas, onFechar }: Pick<Tela, 'p'> & { reg
         </div>
       </div>
 
-      <div className="cartao vidro resumo-cartao">
+      <div className="cartao superficie resumo-cartao">
         <span className="rotulo">Seu treino</span>
         <PerfilTreino etapas={registro.trechos} zonas={zonas} />
         {fatias.length > 0 && (
@@ -100,7 +100,7 @@ export function Resumo({ p, registro, zonas, onFechar }: Pick<Tela, 'p'> & { reg
       </div>
 
       <div className="folha-botoes resumo-botoes">
-        <button className="botao-secundario vidro" onClick={compartilhar} disabled={gerando}>
+        <button className="botao-secundario superficie" onClick={compartilhar} disabled={gerando}>
           <IconeCompartilhar tam={18} /> {gerando ? 'Gerando…' : 'Compartilhar'}
         </button>
         <button className="folha-ok" onClick={onFechar}>

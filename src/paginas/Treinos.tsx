@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { avisar, confirmar } from '../componentes/Avisos';
+import { Pagina } from '../componentes/Pagina';
 import { Folha } from '../componentes/Folha';
 import { PerfilTreino } from '../componentes/Graficos';
 import { IconeCiclo, IconeFechar, IconeMais, IconePlay, IconeSubir, IconeTrocar } from '../componentes/Icones';
@@ -23,7 +25,6 @@ import {
 } from '../lib/treino';
 import { vibrar } from '../lib/vibrar';
 import type { Zona } from '../lib/zonas';
-import { BotaoAjustes } from './Ritmo';
 
 interface Props extends Tela {
   zonas: Zona[] | null;
@@ -52,16 +53,11 @@ export function Treinos({ p, setP, zonas, onAjustes, onComecar }: Props) {
 
   return (
     <>
-      <header className="topo">
-        <h1 className="titulo">Treinos</h1>
-        <BotaoAjustes onClick={onAjustes} />
-      </header>
-
-      <main className="pagina">
+      <Pagina titulo="Treinos" onAjustes={onAjustes}>
         <section>
           <h2 className="secao">Meus treinos</h2>
           {p.treinos.length === 0 ? (
-            <div className="vazio vidro">
+            <div className="vazio superficie">
               <div className="previa-mini" aria-hidden="true">
                 <PerfilTreino etapas={expandir(lista[1])} zonas={zonas} />
               </div>
@@ -71,7 +67,7 @@ export function Treinos({ p, setP, zonas, onAjustes, onComecar }: Props) {
           ) : (
             <div className="lista">
               {p.treinos.map((t) => (
-                <div key={t.id} className="treino vidro">
+                <div key={t.id} className="treino superficie">
                   <button className="treino-info" onClick={() => setEditando(t.id)}>
                     <b>{t.nome}</b>
                     <small>{resumo(t)}</small>
@@ -101,7 +97,7 @@ export function Treinos({ p, setP, zonas, onAjustes, onComecar }: Props) {
           </p>
           <div className="lista">
             {lista.map((m) => (
-              <button key={m.id} className="treino modelo vidro" onClick={() => adicionar(copiar(m))}>
+              <button key={m.id} className="treino modelo superficie" onClick={() => adicionar(copiar(m))}>
                 <span className="treino-info">
                   <b>{m.nome}</b>
                   <small>{resumo(m)}</small>
@@ -113,7 +109,7 @@ export function Treinos({ p, setP, zonas, onAjustes, onComecar }: Props) {
               </button>
             ))}
             <button
-              className="treino modelo vidro"
+              className="treino modelo superficie"
               onClick={() =>
                 adicionar({
                   id: novoId(),
@@ -132,7 +128,7 @@ export function Treinos({ p, setP, zonas, onAjustes, onComecar }: Props) {
             </button>
           </div>
         </section>
-      </main>
+      </Pagina>
 
       {treino && (
         <Editor
@@ -248,7 +244,7 @@ function Editor({ p, setP, treino, zonas, onFechar, onComecar }: Tela & { treino
 
           <div className="adicionar">
             <button
-              className="botao-secundario vidro"
+              className="botao-secundario superficie"
               onClick={() =>
                 mudar((t) => ({ ...t, passos: [...t.passos, { id: novoId(), tipo: 'bloco', bloco: 'ritmo', esforco: { medida: 'tempo', valor: 300, pace: pacePadrao } }] }))
               }
@@ -256,7 +252,7 @@ function Editor({ p, setP, treino, zonas, onFechar, onComecar }: Tela & { treino
               + Bloco
             </button>
             <button
-              className="botao-secundario vidro"
+              className="botao-secundario superficie"
               onClick={() =>
                 mudar((t) => ({
                   ...t,
@@ -282,7 +278,7 @@ function Editor({ p, setP, treino, zonas, onFechar, onComecar }: Tela & { treino
           </p>
 
           <div className="folha-botoes">
-            <button className="botao-secundario vidro" onClick={compartilhar}>
+            <button className="botao-secundario superficie" onClick={compartilhar}>
               Compartilhar
             </button>
             <button className="folha-ok" disabled={!treino.passos.length} onClick={onComecar}>
@@ -291,11 +287,20 @@ function Editor({ p, setP, treino, zonas, onFechar, onComecar }: Tela & { treino
           </div>
           <button
             className="botao-texto perigo"
-            onClick={() => {
-              if (confirm(`Apagar "${treino.nome}"?`)) {
-                fechar();
-                setP((a) => ({ ...a, treinos: a.treinos.filter((t) => t.id !== treino.id) }));
-              }
+            onClick={async () => {
+              const ok = await confirmar({ titulo: `Apagar "${treino.nome}"?`, confirmar: 'Apagar treino', perigo: true });
+              if (!ok) return;
+              fechar();
+              const copia = treino;
+              const pos = p.treinos.findIndex((t) => t.id === treino.id);
+              setP((a) => ({ ...a, treinos: a.treinos.filter((t) => t.id !== treino.id) }));
+              avisar('Treino apagado', () =>
+                setP((a) => {
+                  const lista = [...a.treinos];
+                  lista.splice(Math.max(0, pos), 0, copia);
+                  return { ...a, treinos: lista };
+                }),
+              );
             }}
           >
             Apagar treino

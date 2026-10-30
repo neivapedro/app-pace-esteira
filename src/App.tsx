@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { AbaBar } from './componentes/AbaBar';
 import { Ajustes } from './componentes/Ajustes';
+import { AvisosHost } from './componentes/Avisos';
 import { opcoes, zonasDe } from './lib/contexto';
 import { anotarNivel } from './lib/historico';
 import { calcular, limitar } from './lib/pace';
@@ -60,7 +61,7 @@ export function App() {
   const tela = { p, setP };
 
   return (
-    <div className={`app aba-${p.aba}`}>
+    <div className={`app aba-${p.aba} ${executando ? 'treinando' : ''}`}>
       <div className="fundo" aria-hidden="true">
         <i className="bolha b1" />
         <i className="bolha b2" />
@@ -93,6 +94,7 @@ export function App() {
       )}
 
       {ajustes && <Ajustes {...tela} onFechar={() => setAjustes(false)} />}
+      <AvisosHost />
     </div>
   );
 }
