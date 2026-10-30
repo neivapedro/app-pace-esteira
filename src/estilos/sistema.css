@@ -1,0 +1,390 @@
+/* ---------- Componentes do design system ----------
+   Vem por último: padroniza alturas, toque, foco, superfícies, status e unidades. */
+
+/* Conteúdo em superfície simples; o vidro fica só para navegação e controles */
+.superficie {
+  background: var(--superficie);
+  border: 1px solid var(--superficie-borda);
+}
+
+button.superficie {
+  transition: transform var(--m-rapido) var(--curva), background-color var(--m-padrao);
+}
+
+/* Toque: mesma resposta em todos os botões; foco visível só pelo teclado */
+:where(button) {
+  transition:
+    transform var(--m-rapido) var(--curva),
+    background-color var(--m-padrao),
+    color var(--m-padrao),
+    opacity var(--m-padrao);
+}
+
+:where(button:active:not(:disabled)) {
+  transform: scale(0.96);
+}
+
+:focus-visible {
+  outline: 2px solid var(--cor);
+  outline-offset: 3px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+button:disabled {
+  opacity: 0.4;
+}
+
+/* Alturas padronizadas */
+.icone-botao,
+.passo {
+  width: var(--alt-controle);
+  height: var(--alt-controle);
+}
+
+.segmento button,
+.opcoes button {
+  height: 36px;
+}
+
+.chip,
+.medida-troca,
+.esforco-rotulo,
+.tipo-ciclo {
+  height: var(--alt-chip);
+}
+
+.mini,
+.registro-apagar,
+.passo-acoes button {
+  width: 36px;
+  height: 36px;
+}
+
+.estrela,
+.inclinacao-botao {
+  height: 40px;
+}
+
+.estrela {
+  width: 40px;
+}
+
+.folha-ok,
+.botao-secundario {
+  height: var(--alt-primario);
+  border-radius: var(--r-lg);
+}
+
+/* Área mínima de toque de 44 pt sem mudar o desenho */
+.mini,
+.passo-acoes button,
+.registro-apagar,
+.medida-troca,
+.tipo-ciclo,
+.chip,
+.estrela,
+.inclinacao-botao,
+.opcoes button,
+.botao-texto,
+.paleta,
+.coluna {
+  position: relative;
+}
+
+.mini::after,
+.passo-acoes button::after,
+.registro-apagar::after,
+.medida-troca::after,
+.tipo-ciclo::after,
+.chip::after,
+.estrela::after,
+.inclinacao-botao::after,
+.opcoes button::after,
+.botao-texto::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100%, var(--toque));
+  height: max(100%, var(--toque));
+  transform: translate(-50%, -50%);
+}
+
+/* Status (variação no Painel) com cores próprias, diferentes das zonas */
+.delta.sobe {
+  color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 14%, transparent);
+}
+
+.delta.desce {
+  color: var(--alerta);
+  background: color-mix(in srgb, var(--alerta) 14%, transparent);
+}
+
+.delta.neutro {
+  color: var(--neutro);
+  background: var(--superficie);
+}
+
+/* Estrela na cor do app (não confunde com o amarelo do Limiar) */
+.estrela.ligada path {
+  fill: var(--cor);
+  stroke: var(--cor);
+}
+
+/* Unidades: sempre menores e com respiro depois do número */
+.resultado-meta small,
+.kpi b small,
+.resumo-numeros small,
+.esforco .ajuste .num small {
+  margin-left: 0.18em;
+  font-size: 0.5em;
+  font-weight: var(--peso-forte);
+  color: var(--texto-2);
+}
+
+/* Título do cartão em cima, subtítulo embaixo (não quebra em telas estreitas) */
+.cartao-titulo {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+/* Colunas: base visível em semanas vazias e datas alternadas em telas estreitas */
+.coluna-barra {
+  min-height: 3px;
+}
+
+.colunas {
+  container-type: inline-size;
+}
+
+@container (max-width: 340px) {
+  .coluna:nth-child(even):not(.destaque) .coluna-rotulo {
+    visibility: hidden;
+  }
+}
+
+.linha-valor {
+  fill: var(--texto);
+  font-size: var(--t-legenda);
+  font-weight: var(--peso-forte);
+}
+
+/* Fundo parado durante o treino (menos distração e bateria) */
+.app.treinando .bolha {
+  animation-play-state: paused;
+}
+
+/* ---------- Cabeçalho das páginas: título grande que vira título pequeno ao rolar ---------- */
+
+.topo-pagina {
+  position: relative;
+  min-height: var(--alt-controle);
+  justify-content: flex-end;
+}
+
+.topo-pagina .titulo-compacto {
+  position: absolute;
+  left: 56px;
+  right: 56px;
+  text-align: center;
+  font-size: var(--t-corpo);
+  font-weight: var(--peso-forte);
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity var(--m-padrao) var(--curva),
+    transform var(--m-padrao) var(--curva);
+  pointer-events: none;
+}
+
+.topo-pagina.rolado .titulo-compacto {
+  opacity: 1;
+  transform: none;
+}
+
+.pagina > .titulo {
+  margin: -4px 0 -6px;
+  padding-left: 4px;
+}
+
+/* ---------- Confirmação e avisos dentro do app ---------- */
+
+.pedido-fundo {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 var(--e-3) calc(env(safe-area-inset-bottom) + var(--e-3));
+  background: rgba(0, 0, 0, 0.5);
+  animation: aparecer var(--m-padrao) ease-out;
+}
+
+.pedido {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  animation: subir var(--m-enfase) var(--curva);
+}
+
+.pedido-cartao {
+  padding: var(--e-5) var(--e-4) var(--e-4);
+  border-radius: var(--r-xl);
+  text-align: center;
+}
+
+.pedido-cartao b {
+  display: block;
+  font-size: var(--t-corpo);
+  font-weight: var(--peso-forte);
+}
+
+.pedido-cartao p {
+  margin: var(--e-1) 0 var(--e-4);
+  font-size: var(--t-apoio);
+  color: var(--texto-2);
+}
+
+.pedido-cartao .folha-ok.perigo {
+  background: linear-gradient(135deg, #ff5d73, #ff3d5a);
+  color: #fff;
+  box-shadow: 0 10px 30px -12px #ff3d5a;
+}
+
+.pedido .botao-secundario {
+  width: 100%;
+  border-radius: var(--r-xl);
+}
+
+.aviso {
+  position: fixed;
+  left: 50%;
+  top: calc(env(safe-area-inset-top) + 8px);
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  max-width: calc(100% - 32px);
+  padding: 10px 10px 10px 18px;
+  border-radius: var(--r-pill);
+  font-size: var(--t-apoio);
+  font-weight: var(--peso-regular);
+  white-space: nowrap;
+  transform: translateX(-50%);
+  animation: aviso-entra var(--m-enfase) var(--curva-mola);
+}
+
+/* Aviso por cima do cabeçalho: fundo sólido para não misturar com o que está atrás */
+.aviso.vidro {
+  background: color-mix(in srgb, var(--fundo) 70%, #2a2a36);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.7);
+}
+
+.aviso.sem-acao {
+  padding-right: 18px;
+}
+
+.aviso button {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: var(--r-pill);
+  font-weight: var(--peso-forte);
+  color: var(--tinta);
+  background: linear-gradient(135deg, var(--cor), var(--cor-2));
+}
+
+@keyframes aviso-entra {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -16px) scale(0.96);
+  }
+}
+
+/* ---------- iPhone SE e telas baixas: aperta o que fica em volta do círculo ---------- */
+
+@media (max-height: 700px) {
+  .app {
+    gap: 6px;
+  }
+  .prova {
+    padding: 5px 2px;
+    gap: 0;
+  }
+  .prova strong {
+    font-size: var(--t-apoio);
+  }
+  .favoritos {
+    min-height: 36px;
+  }
+  .estrela,
+  .inclinacao-botao {
+    height: 36px;
+  }
+  .estrela {
+    width: 36px;
+  }
+  .regua-area {
+    height: 70px;
+  }
+  .dica {
+    display: none;
+  }
+  .abas button {
+    height: 44px;
+  }
+}
+
+/* ---------- iPad e computador: páginas em duas colunas ---------- */
+
+@media (min-width: 768px) {
+  .app.aba-treino,
+  .app.aba-metas,
+  .app.aba-painel {
+    max-width: 1000px;
+  }
+  .app .abas {
+    width: 100%;
+    max-width: 520px;
+    align-self: center;
+  }
+  .aba-treino .pagina,
+  .aba-metas .pagina,
+  .aba-painel .pagina {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-content: start;
+    align-items: start;
+    gap: var(--e-5);
+  }
+  .pagina > .titulo,
+  .aba-metas .fonte,
+  .aba-painel .painel,
+  .aba-painel .previa-convite {
+    grid-column: 1 / -1;
+  }
+  .aba-painel .painel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+  .aba-painel .painel .kpis,
+  .aba-painel .painel .kpis-nota {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Círculo central da aba Ritmo: mantém exatamente o visual anterior */
+.medidor .rotulo {
+  color: var(--texto-3);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}

@@ -7,7 +7,7 @@ import { IconeMetas, IconePainel, IconeRitmo, IconeTreino } from './Icones';
 
 const ABAS: { id: Aba; nome: string; icone: ReactNode }[] = [
   { id: 'ritmo', nome: 'Ritmo', icone: <IconeRitmo /> },
-  { id: 'treino', nome: 'Treino', icone: <IconeTreino /> },
+  { id: 'treino', nome: 'Treinos', icone: <IconeTreino /> },
   { id: 'metas', nome: 'Metas', icone: <IconeMetas /> },
   { id: 'painel', nome: 'Painel', icone: <IconePainel /> },
 ];

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { avisar } from '../componentes/Avisos';
 import { Folha } from '../componentes/Folha';
 import { IconeAjustes, IconeInclinacao } from '../componentes/Icones';
 import { Medidor } from '../componentes/Medidor';
@@ -77,6 +78,7 @@ export function Ritmo({ p, setP, zonas, onAjustes }: Props) {
 
   const alternarFavorito = () => {
     vibrar();
+    avisar(salvo ? `${rotuloValor(valor)} saiu dos salvos` : `${rotuloValor(valor)} salvo nos seus ritmos`);
     setP((a) => {
       const chave = a.modo === 'pace' ? 'favoritosPace' : 'favoritosEsteira';
       const v = a.modo === 'pace' ? a.pace : a.esteira;
@@ -150,7 +152,7 @@ export function Ritmo({ p, setP, zonas, onAjustes }: Props) {
         </p>
       </main>
 
-      <section className="provas vidro" aria-label="Tempo nas provas">
+      <section className="provas superficie" aria-label="Tempo nas provas">
         {PROVAS.map((prova) => (
           <div key={prova.nome} className="prova">
             <span>{prova.nome}</span>
@@ -173,7 +175,7 @@ export function Ritmo({ p, setP, zonas, onAjustes }: Props) {
               {favoritos.map((f) => (
                 <button
                   key={`f${f}`}
-                  className={`chip vidro num ${f === valor ? 'ativo' : ''}`}
+                  className={`chip superficie num ${f === valor ? 'ativo' : ''}`}
                   onClick={() => {
                     vibrar();
                     mudarValor(f);
@@ -258,7 +260,7 @@ function Inclinacao({ p, setP, onFechar }: Tela & { onFechar: () => void }) {
           </p>
           <p className="nota-texto">Se você usa 1% só para imitar a rua, deixe em 0% aqui.</p>
           <div className="folha-botoes">
-            <button className="botao-secundario vidro" onClick={() => mudar(0)}>
+            <button className="botao-secundario superficie" onClick={() => mudar(0)}>
               Zerar
             </button>
             <button className="folha-ok" onClick={fechar}>

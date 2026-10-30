@@ -182,6 +182,13 @@ export function Linha({ pontos, altura = 150, inverter }: { pontos: Ponto[]; alt
           {pontos.map((p, i) => (
             <circle key={i} cx={x(i)} cy={y(p.y)} r={sel === i ? 6 : 3.5} className={`linha-ponto ${sel === i ? 'sel' : ''}`} />
           ))}
+          {pontos.length <= 4 &&
+            sel === null &&
+            pontos.map((p, i) => (
+              <text key={`v${i}`} x={x(i)} y={y(p.y) - 12} className="linha-valor" textAnchor={i === 0 ? 'start' : i === pontos.length - 1 ? 'end' : 'middle'}>
+                {p.valor.split(' · ')[0]}
+              </text>
+            ))}
           {pontos.map((p, i) => (
             <text key={`t${i}`} x={x(i)} y={altura - 6} className="linha-rotulo" textAnchor="middle">
               {p.rotulo}

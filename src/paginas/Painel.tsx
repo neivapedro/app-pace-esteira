@@ -1,4 +1,6 @@
 import { ArcoKpi, Colunas, Legenda, Linha, Mini, PerfilTreino, Rosca } from '../componentes/Graficos';
+import { avisar } from '../componentes/Avisos';
+import { Pagina } from '../componentes/Pagina';
 import { IconeLixo } from '../componentes/Icones';
 import { rotuloPace, textoPace, type Tela } from '../lib/contexto';
 import { semanas, tempoPorZona, variacao, type Registro } from '../lib/historico';
@@ -7,7 +9,6 @@ import type { Aba, Preferencias } from '../lib/preferencias';
 import { formatarDistancia } from '../lib/treino';
 import { vibrar } from '../lib/vibrar';
 import type { Zona } from '../lib/zonas';
-import { BotaoAjustes } from './Ritmo';
 
 interface Props extends Tela {
   zonas: Zona[] | null;
@@ -57,12 +58,7 @@ export function Painel({ p, setP, zonas, onAjustes, irPara }: Props) {
 
   return (
     <>
-      <header className="topo">
-        <h1 className="titulo">Painel</h1>
-        <BotaoAjustes onClick={onAjustes} />
-      </header>
-
-      <main className="pagina">
+      <Pagina titulo="Painel" onAjustes={onAjustes}>
         <div className={`painel ${vazio ? 'previa' : ''}`}>
           <div className="kpis">
             <Kpi titulo="Distância" valor={formatarVelocidade(atual.km, 1)} unidade="km" delta={variacao(atual.km, anterior.km)} serie={sem.map((s) => s.km)} />
@@ -71,7 +67,7 @@ export function Painel({ p, setP, zonas, onAjustes, irPara }: Props) {
           </div>
           <p className="kpis-nota">Esta semana · comparado com a anterior</p>
 
-          <section className="cartao vidro">
+          <section className="cartao superficie">
             <div className="cartao-titulo">
               <h2>Distância por semana</h2>
               <span className="num">{formatarVelocidade(sem.reduce((s, x) => s + x.km, 0), 1)} km em 8 sem.</span>
@@ -86,7 +82,7 @@ export function Painel({ p, setP, zonas, onAjustes, irPara }: Props) {
             />
           </section>
 
-          <section className="cartao vidro">
+          <section className="cartao superficie">
             <div className="cartao-titulo">
               <h2>Tempo por zona</h2>
               <span>últimos 30 dias</span>
@@ -122,7 +118,7 @@ export function Painel({ p, setP, zonas, onAjustes, irPara }: Props) {
           </div>
         )}
 
-        <section className="cartao vidro">
+        <section className="cartao superficie">
           <div className="cartao-titulo">
             <h2>Índice de forma</h2>
             {niveis.length > 0 && <span>{niveis.length > 1 ? `desde ${diaMes(niveis[0].data)}` : 'primeiro registro'}</span>}
@@ -138,7 +134,7 @@ export function Painel({ p, setP, zonas, onAjustes, irPara }: Props) {
           ) : (
             <>
               <p className="nota-texto">Informe uma prova recente em Metas para acompanhar a evolução da sua forma.</p>
-              <button className="botao-secundario vidro largo" onClick={() => irPara('metas')}>
+              <button className="botao-secundario superficie largo" onClick={() => irPara('metas')}>
                 Ir para Metas
               </button>
             </>
@@ -152,7 +148,7 @@ export function Painel({ p, setP, zonas, onAjustes, irPara }: Props) {
               {ultimos.map((r) => {
                 const km = r.metros / 1000;
                 return (
-                  <div key={r.id} className="registro vidro">
+                  <div key={r.id} className="registro superficie">
                     <div className="registro-topo">
                       <span className="registro-data">{new Date(r.data).toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })}</span>
                       <b>{r.nome}</b>
@@ -161,9 +157,11 @@ export function Painel({ p, setP, zonas, onAjustes, irPara }: Props) {
                         className="registro-apagar"
                         aria-label="Apagar do histórico"
                         onClick={() => {
-                          if (!confirm('Apagar este treino do histórico?')) return;
                           vibrar();
                           setP((a) => ({ ...a, historico: a.historico.filter((x) => x.id !== r.id) }));
+                          avisar('Treino apagado do histórico', () =>
+                            setP((a) => ({ ...a, historico: [...a.historico, r].sort((x, y) => x.data - y.data) })),
+                          );
                         }}
                       >
                         <IconeLixo tam={16} />
@@ -184,14 +182,14 @@ export function Painel({ p, setP, zonas, onAjustes, irPara }: Props) {
             </div>
           </section>
         )}
-      </main>
+      </Pagina>
     </>
   );
 }
 
 function Kpi({ titulo, valor, unidade, delta, serie }: { titulo: string; valor: string; unidade?: string; delta: number | null; serie: number[] }) {
   return (
-    <div className="kpi vidro">
+    <div className="kpi superficie">
       <span className="rotulo">{titulo}</span>
       <b className="num">
         {valor}
@@ -199,6 +197,8 @@ function Kpi({ titulo, valor, unidade, delta, serie }: { titulo: string; valor: 
       </b>
       {delta === null ? (
         <span className="delta neutro">—</span>
+      ) : Math.round(delta) === 0 ? (
+        <span className="delta neutro">= 0%</span>
       ) : (
         <span className={`delta ${delta >= 0 ? 'sobe' : 'desce'}`}>
           {delta >= 0 ? '▲' : '▼'} {Math.abs(Math.round(delta))}%

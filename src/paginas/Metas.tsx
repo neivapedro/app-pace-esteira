@@ -1,11 +1,12 @@
 import { ArcoKpi, EspectroZonas, Linha } from '../componentes/Graficos';
+import { avisar } from '../componentes/Avisos';
+import { Pagina } from '../componentes/Pagina';
 import { RodaTempo } from '../componentes/Roda';
 import { opcoes, rotuloEsteira, rotuloPace, textoEsteira, textoPace, type Tela } from '../lib/contexto';
 import { calcular, FAIXA_PACE, formatarDuracao, formatarVelocidade, limitar, paceNaUnidade, PROVAS } from '../lib/pace';
 import type { Aba, Preferencias, Prova } from '../lib/preferencias';
 import { vibrar } from '../lib/vibrar';
 import { DISTANCIAS, meioDaZona, preverTempo, vdot, zonas as calcularZonas, type Zona } from '../lib/zonas';
-import { BotaoAjustes } from './Ritmo';
 
 interface Props extends Tela {
   zonas: Zona[] | null;
@@ -27,13 +28,8 @@ export function Metas({ p, setP, zonas, onAjustes, irPara }: Props) {
 
   return (
     <>
-      <header className="topo">
-        <h1 className="titulo">Metas</h1>
-        <BotaoAjustes onClick={onAjustes} />
-      </header>
-
-      <main className="pagina">
-        <section className="cartao vidro">
+      <Pagina titulo="Metas" onAjustes={onAjustes}>
+        <section className="cartao superficie">
           <h2>Pace da meta</h2>
           <p className="cartao-sub">Quero correr</p>
           <Distancias valor={p.meta.km} onChange={(km) => setP((a) => ({ ...a, meta: { ...a.meta, km } }))} />
@@ -60,7 +56,7 @@ export function Metas({ p, setP, zonas, onAjustes, irPara }: Props) {
           </button>
         </section>
 
-        <section className="cartao vidro">
+        <section className="cartao superficie">
           <h2>Seu nível e zonas</h2>
           {!p.nivel || !indice || !zonas ? (
             <>
@@ -89,7 +85,7 @@ export function Metas({ p, setP, zonas, onAjustes, irPara }: Props) {
         <p className="fonte">
           Zonas e previsões pelo método VDOT de Jack Daniels (Daniels' Running Formula). São estimativas: calor, terreno e cansaço mudam o resultado.
         </p>
-      </main>
+      </Pagina>
     </>
   );
 }
@@ -177,7 +173,14 @@ function Nivel({ p, setP, nivel, indice, zonas, usar, metaPace, ritmoAtual }: Ni
         <span>Mostrar zonas na régua</span>
         <input type="checkbox" className="chave" checked={p.zonasNaRegua} onChange={(e) => setP((a) => ({ ...a, zonasNaRegua: e.target.checked }))} />
       </label>
-      <button className="botao-texto" onClick={() => setP((a) => ({ ...a, nivel: null }))}>
+      <button
+        className="botao-texto"
+        onClick={() => {
+          const anterior = nivel;
+          setP((a) => ({ ...a, nivel: null }));
+          avisar('Prova e zonas apagadas', () => setP((a) => ({ ...a, nivel: anterior })));
+        }}
+      >
         Apagar prova e zonas
       </button>
     </>
@@ -190,7 +193,7 @@ function Distancias({ valor, onChange }: { valor: number; onChange: (km: number)
       {DISTANCIAS.map((d) => (
         <button
           key={d.nome}
-          className={`chip vidro ${Math.abs(d.km - valor) < 0.01 ? 'ativo' : ''}`}
+          className={`chip superficie ${Math.abs(d.km - valor) < 0.01 ? 'ativo' : ''}`}
           onClick={() => {
             vibrar();
             onChange(d.km);
